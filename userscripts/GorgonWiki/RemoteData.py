@@ -16,9 +16,12 @@ class Cdn:
         return r.json()
 
     def get_file(self, file):
-        path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '.cache/v' + self.version))
-        if not os.path.isdir(path):
-            os.mkdir(path)
+        path = os.path.abspath(os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            '.cache',
+            'v' + self.version)
+        )
+        os.makedirs(path, exist_ok=True)
         filename = os.path.join(path, file + '.json')
 
         try:
