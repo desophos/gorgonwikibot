@@ -3,8 +3,8 @@ Bot scripts for the Project: Gorgon Wiki
 
 ## Usage
 * Install pywikibot
-* Link userscripts/ to <pywikibot>/scripts/userscripts/ (or copy the files there)
-* Link projectgorgon_family.py to <pywikibot>/pywikibot/families/
+* Link userscripts/ to _pywikibot_/scripts/userscripts/ (or copy the files there)
+* Link projectgorgon_family.py into _pywikibot_/pywikibot/families/
 * Configure pywikibot (user detail)
 * Run pywikibot, e.g. "python pwb.py create_missing_quest_pages"
 
