@@ -29,7 +29,6 @@ def get_abilities(cdn):
         }
         for a in cdn.get_file("abilities").values()
         if validate_name(a["InternalName"], include)
-        and a["Description"]  # we only care about abilities with tooltips
         and "AttributesThatDeltaPowerCost" not in a  # no player abilities
     }
 
@@ -60,10 +59,14 @@ def generate_profiles(cdn):
         profile = ""
         rages, nonrages = [], []
         for a in alist:
-            if "RageAttack" in abilities[a]["keywords"]:
-                rages.append(a)
-            else:
-                nonrages.append(a)
+            # we only care about abilities with tooltips
+            # the description check is here instead of in
+            # get_abilities to avoid KeyErrors
+            if abilities[a]["Description"]:
+                if "RageAttack" in abilities[a]["Keywords"]:
+                    rages.append(a)
+                else:
+                    nonrages.append(a)
         # we want all nonrages before all rages
         for a in nonrages:
             profile += f": {{{{Combat Ability|{a}}}}}\n"
