@@ -23,9 +23,9 @@ def get_abilities(cdn):
 
     return {
         a["InternalName"]: {
-            "desc": a["Description"],
-            "icon": a["IconID"],
-            "keywords": a.get("Keywords", []),
+            "Description": a["Description"],
+            "IconID": a["IconID"],
+            "Keywords": a.get("Keywords", []),
         }
         for a in cdn.get_file("abilities").values()
         if validate_name(a["InternalName"], include)
