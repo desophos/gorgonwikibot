@@ -96,7 +96,6 @@ def main(*args):
             pywikibot.output(f"AIP:{name}\n{page.text}\n")
         else:
             page.save(summary="Create AI Profile page")
-            pywikibot.output(f"Page saved for profile {name}")
 
 
 if __name__ == "__main__":
