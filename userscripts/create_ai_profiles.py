@@ -29,6 +29,7 @@ def get_abilities(cdn):
         }
         for a in cdn.get_file("abilities").values()
         if validate_name(a["InternalName"], include)
+        and a["Description"]  # we only care about abilities with tooltips
         and "AttributesThatDeltaPowerCost" not in a  # no player abilities
     }
 
