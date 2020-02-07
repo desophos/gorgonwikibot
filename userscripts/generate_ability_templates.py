@@ -1,14 +1,16 @@
 from create_ai_profiles import get_abilities
+from GorgonWiki.RemoteData import Cdn
 
 
-def write_template(filename, key):
+def write_template(abilities, key, filename):
     with open(filename, "w") as f:
-        f.writelines(f"| {k}={v[key]}\n" for k, v in get_abilities().items())
+        f.writelines(f"| {k}={v[key]}\n" for k, v in abilities)
 
 
 def main():
-    write_template("abilities.txt", "desc")
-    write_template("icons.txt", "icon")
+    abilities = get_abilities(Cdn()).items()
+    write_template(abilities, "Description", "abilities.txt")
+    write_template(abilities, "IconID", "icons.txt")
 
 
 if __name__ == "__main__":
