@@ -6,9 +6,9 @@ def is_player_minigolem(name):
     return "Minigolem" in name and "Enemy" not in name
 
 
-def validate_name(name, include=[]):
+def validate_name(name):
     # no player pets or minigolems
-    return name in include or not ("Pet" in name or is_player_minigolem(name))
+    return not ("Pet" in name or is_player_minigolem(name))
 
 
 def get_abilities(cdn):
@@ -28,7 +28,8 @@ def get_abilities(cdn):
             "Keywords": a.get("Keywords", []),
         }
         for a in cdn.get_file("abilities").values()
-        if validate_name(a["InternalName"], include)
+        if a["InternalName"] in include  # special cases
+        or validate_name(a["InternalName"])
         and "AttributesThatDeltaPowerCost" not in a  # no player abilities
     }
 
