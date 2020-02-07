@@ -14,7 +14,7 @@ def validate_name(name):
 def get_abilities(cdn):
     include = [
         "PetUndeadArrow1",
-        "PetUndeadArrow2",
+        # "PetUndeadArrow2",  # no description
         "PetUndeadOmegaArrow",
         "MinigolemBombToss4",
         "MinigolemPunch4",
