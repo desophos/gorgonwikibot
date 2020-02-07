@@ -31,6 +31,7 @@ def get_abilities(cdn):
         if a["InternalName"] in include  # special cases
         or validate_name(a["InternalName"])
         and "AttributesThatDeltaPowerCost" not in a  # no player abilities
+        and a["Description"]  # we only care about abilities with tooltips
     }
 
 
@@ -60,10 +61,7 @@ def generate_profiles(cdn):
         profile = ""
         rages, nonrages = [], []
         for a in alist:
-            # we only care about abilities with tooltips
-            # the description check is here instead of in
-            # get_abilities to avoid KeyErrors
-            if abilities[a]["Description"]:
+            if a in abilities:  # some abilities may have been filtered out
                 if "RageAttack" in abilities[a]["Keywords"]:
                     rages.append(a)
                 else:
