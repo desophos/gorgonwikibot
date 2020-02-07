@@ -86,12 +86,14 @@ def main(*args):
         if option == "-dry-run":
             dry_run = True
 
+    if dry_run:
+        pywikibot.output("Dry-run mode, not creating pages...\n")
+
     site = pywikibot.Site()
     for name, profile in generate_profiles(cdn).items():
         page = pywikibot.Page(site, f"AIP:{name}")
         page.text = profile
         if dry_run:
-            pywikibot.output("Dry-run mode")
             pywikibot.output(f"AIP:{name}\n{page.text}\n")
         else:
             page.save(summary="Create AI Profile page")
