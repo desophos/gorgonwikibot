@@ -58,21 +58,23 @@ def generate_profiles(cdn):
     abilities = get_abilities(cdn)
     profiles = {}
     for ai, alist in ais.items():
-        profile = ""
-        rages, nonrages = [], []
-        for a in alist:
-            if a in abilities:  # some abilities may have been filtered out
+        # ignore abilities that have already been filtered out
+        alist = list(filter(lambda a: a in abilities, alist))
+        if alist:  # ai has at least one valid ability
+            profile = ""
+            rages, nonrages = [], []
+            for a in alist:
                 if "RageAttack" in abilities[a]["Keywords"]:
                     rages.append(a)
                 else:
                     nonrages.append(a)
-        # we want all nonrages before all rages
-        for a in nonrages:
-            profile += f": {{{{Combat Ability|{a}}}}}\n"
-        for a in rages:
-            profile += f": {{{{Combat Ability Rage|{a}}}}}\n"
-        profile += "<noinclude>[[Category:AI Profile]]</noinclude>"
-        profiles[ai] = profile
+            # we want all nonrages before all rages
+            for a in nonrages:
+                profile += f": {{{{Combat Ability|{a}}}}}\n"
+            for a in rages:
+                profile += f": {{{{Combat Ability Rage|{a}}}}}\n"
+            profile += "<noinclude>[[Category:AI Profile]]</noinclude>"
+            profiles[ai] = profile
     return profiles
 
 
