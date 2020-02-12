@@ -94,10 +94,14 @@ def main(*args):
 
     site = pywikibot.Site()
     for name, profile in generate_profiles(cdn).items():
-        page = pywikibot.Page(site, f"AIP:{name}")
+        title = f"AIP:{name}"
+        page = pywikibot.Page(site, title)
+        if page.text == profile:
+            pywikibot.output(f"No changes to {title}\n")
+            continue
         page.text = profile
         if dry_run:
-            pywikibot.output(f"AIP:{name}\n{page.text}\n")
+            pywikibot.output(f"{title}\n{page.text}\n")
         else:
             page.save(summary="Create AI Profile page")
 
