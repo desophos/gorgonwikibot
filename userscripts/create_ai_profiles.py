@@ -41,6 +41,7 @@ def get_ais(cdn):
             ability
             for ability, params in v["Abilities"].items()
             if "minLevel" not in params  # ignore scaled abilities
+            or params["minLevel"] == 1  # SnailRage and SpiderKill
         ]
         for name, v in cdn.get_file("ai").items()
         if validate_name(name)
