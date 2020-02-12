@@ -1,5 +1,5 @@
 import pywikibot
-from scripts.userscripts.GorgonWiki.RemoteData import Cdn
+from GorgonWiki.RemoteData import Cdn
 
 
 def is_player_minigolem(name):
