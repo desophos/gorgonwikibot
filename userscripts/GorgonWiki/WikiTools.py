@@ -105,7 +105,11 @@ class Quest:
                 self.preface = "===Preface===\n" + data["PrefaceText"].strip() + "\n\n"
             elif key == "Objectives":
                 for item in data["Objectives"]:
-                    self.objectives += "* " + item["Description"]  # TODO item linking if item["ItemName"] and item["Type"] == "Collect"
+                    linked_desc = item["Description"]
+                    if item["Type"] == "Collect" and item["ItemName"]:
+                        name = Item.get_name_for_internal(item["ItemName"])
+                        linked_desc = linked_desc.replace(name, "{{Item|" + name + "}}")
+                    self.objectives += "* " + linked_desc
                     if "Number" in item and item["Number"] > 1 and item["Description"].find(str(item["Number"])) == -1:
                         self.objectives += " x%i" % item["Number"]
                     self.objectives += "\n"
