@@ -7,24 +7,22 @@ class Content:
     def __init__(self, id, data):
         self.id = id
         self.data = data
+        self.name = data.get("Name")  # for convenience
 
 
 class Item(Content):
     def __init__(self, id, data):
         super().__init__(id, data)
-        self.name = data["Name"]
 
 
 class Recipe(Content):
     def __init__(self, id, data):
         super().__init__(id, data)
-        self.name = data["Name"]
 
 
 class Quest(Content):
     def __init__(self, id, data):
         super().__init__(id, data)
-        self.name = data["Name"]
 
         area, npcid = data["FavorNPC"].split("/")
         try:
@@ -42,7 +40,6 @@ class Quest(Content):
 class Npc(Content):
     def __init__(self, id, data):
         super().__init__(id, data)
-        self.name = data["Name"]
         self.ref = data["AreaName"] + "/" + self.name
 
 
