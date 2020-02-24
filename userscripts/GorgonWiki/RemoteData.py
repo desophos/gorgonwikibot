@@ -25,15 +25,12 @@ class Cdn:
         filename = os.path.join(path, file + '.json')
 
         try:
-            f = open(filename, 'r')
-            data = json.load(f)
-            f.close()
-            return data
+            with open(filename, 'r') as f:
+                return json.load(f)
         except FileNotFoundError:
             contents = self.download(file)
-            f = open(filename, 'w')
-            json.dump(contents, f)
-            f.close()
+            with open(filename, 'w') as f:
+                json.dump(contents, f)
             return contents
 
 
