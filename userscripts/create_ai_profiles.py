@@ -1,3 +1,5 @@
+import re
+
 import pywikibot
 from GorgonWiki.RemoteData import Cdn
 
@@ -9,6 +11,15 @@ def is_player_minigolem(name):
 def validate_name(name):
     # no player pets or minigolems
     return not ("Pet" in name or is_player_minigolem(name))
+
+
+def is_scaled(ability, params):
+    # some abilities have duplicates scaled to higher levels
+    return (
+        "minLevel" in params
+        and params["minLevel"] > 1  # SnailRage and SpiderKill
+        and re.search(r"[B-Z2-9]$", ability)
+    )
 
 
 def get_abilities(cdn):
@@ -40,8 +51,7 @@ def get_ais(cdn):
         name: [
             ability
             for ability, params in v["Abilities"].items()
-            if "minLevel" not in params  # ignore scaled abilities
-            or params["minLevel"] == 1  # SnailRage and SpiderKill
+            if not is_scaled(ability, params)
         ]
         for name, v in cdn.get_file("ai").items()
         if validate_name(name)
