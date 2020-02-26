@@ -1,5 +1,5 @@
 import pywikibot
-from GorgonWiki.RemoteData import Cdn
+from userscripts.GorgonWiki import cdn
 
 
 def is_player_minigolem(name):
@@ -11,7 +11,7 @@ def validate_name(name):
     return not ("Pet" in name or is_player_minigolem(name))
 
 
-def get_abilities(cdn):
+def get_abilities():
     include = [
         "PetUndeadArrow1",
         # "PetUndeadArrow2",  # no description
@@ -35,7 +35,7 @@ def get_abilities(cdn):
     }
 
 
-def get_ais(cdn):
+def get_ais():
     return {
         name: [
             ability
@@ -48,15 +48,15 @@ def get_ais(cdn):
     }
 
 
-def generate_profiles(cdn):
+def generate_profiles():
     """'''AIP:Kraken'''
     : {{Combat Ability|KrakenBeak}}
     : {{Combat Ability|KrakenSlam}}
     : {{Combat Ability Rage|KrakenRage}}
     <noinclude>[[Category:AI Profile]]</noinclude>
     """
-    ais = get_ais(cdn)
-    abilities = get_abilities(cdn)
+    ais = get_ais()
+    abilities = get_abilities()
     profiles = {}
     for ai, alist in ais.items():
         # ignore abilities that have already been filtered out
@@ -80,7 +80,6 @@ def generate_profiles(cdn):
 
 
 def main(*args):
-    cdn = Cdn()
     local_args = pywikibot.handle_args(args)
     dry_run = False
 
@@ -93,7 +92,7 @@ def main(*args):
         pywikibot.output("Dry-run mode, not creating pages...\n")
 
     site = pywikibot.Site()
-    for name, profile in generate_profiles(cdn).items():
+    for name, profile in generate_profiles().items():
         title = f"AIP:{name}"
         page = pywikibot.Page(site, title)
         if page.text == profile:
