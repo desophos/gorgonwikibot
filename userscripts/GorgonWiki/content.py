@@ -1,3 +1,4 @@
+import re
 from functools import lru_cache
 
 from userscripts.GorgonWiki import cdn
@@ -28,12 +29,11 @@ class Quest(Content):
         try:
             self.npc = get_content_by_id("npcs", npcid)
         except KeyError:
+            # Hack for scripted event NPCs not present in npcs.json
             name = npcid
-            # Hack for scripted event NPCs not present in the JSON
             for event in ("LiveNpc_", "NPC_Halloween_"):
-                if event in name:
-                    name = name.replace(event, "").replace("_", " ")
-                    break
+                name = separate_words(name.replace(event, ""))
+                break
             self.npc = Npc(npcid, {"Name": name, "AreaName": area})
 
 
@@ -48,16 +48,16 @@ class Area(Content):
 
     def __init__(self, id, data):
         super().__init__(id, data)
-        self.name = data["FriendlyName"]
-        self.short_name = data.get("ShortFriendlyName", self.name)
+        self._name = data["FriendlyName"]
 
-    def get_alias(self):
+    @property
+    def name(self):
         if self.id == "AreaRahuCaves":
             return "Rahu Sewer"
         elif self.id in ("AreaCasino", "AreaKurCaves"):
-            return self.name
+            return self._name
         else:
-            return self.short_name
+            return self.data.get("ShortFriendlyName", self._name)
 
     def get_prefix(self):
         if self.id in ("AreaCasino", "AreaDesert1", "AreaKurMountains", "AreaKurCaves"):
@@ -73,6 +73,10 @@ file2cls = {
     "recipes": Recipe,
     "quests": Quest,
 }
+
+
+def separate_words(name):
+    return re.sub(r"(.)([A-Z])", r"\1 \2", name)
 
 
 @lru_cache
