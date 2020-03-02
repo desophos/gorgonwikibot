@@ -92,3 +92,8 @@ def get_content_by_match(cls, matchkey, matchval):
     for k, v in data.items():
         if v[matchkey] == matchval:
             return cls(k, v)
+
+
+def get_name_from_internal(cls, internal):
+    """Convenience function for the common usage of finding the Name corresponding to an InternalName."""
+    return get_content_by_match(cls, "InternalName", internal).name
