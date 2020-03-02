@@ -59,7 +59,7 @@ class Quest(Content):
                     reqs.extend(helper(req["List"]))
                 elif reqtype == "MinFavorLevel":
                     reqs.append(
-                        "The quest is available at {{Favor|%s}} favor."
+                        "This quest is available at {{Favor|%s}} favor."
                         % separate_words(req["Level"])
                     )
                 elif reqtype == "MinSkillLevel":
