@@ -209,7 +209,6 @@ class Quest(Content):
                     % get_content_by_match(Ability, "InternalName", v).link
                 )
             elif k == "Rewards":
-                # Rewards is a list, maybe sometimes a dict?
                 for reward in v:
                     if reward["T"] in ("SkillXP", "SkillXp"):  # Inconsistent uppercase
                         rewards.append(
