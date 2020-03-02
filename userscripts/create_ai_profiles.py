@@ -71,9 +71,9 @@ def generate_profiles():
                     nonrages.append(a)
             # we want all nonrages before all rages
             for a in nonrages:
-                profile += f": {{{{Combat Ability|{a}}}}}\n"
+                profile += ": {{Combat Ability|%s}}\n" % a
             for a in rages:
-                profile += f": {{{{Combat Ability Rage|{a}}}}}\n"
+                profile += ": {{Combat Ability Rage|%s}}\n" % a
             profile += "<noinclude>[[Category:AI Profile]]</noinclude>"
             profiles[ai] = profile
     return profiles
