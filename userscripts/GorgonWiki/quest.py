@@ -15,19 +15,22 @@ class Quest(Content):
         if not isinstance(self.data["Requirements"], list):
             self.data["Requirements"] = [self.data["Requirements"]]
 
-        area, npcid = data["FavorNPC"].split("/")
-        try:
-            self.npc = get_content_by_id("npcs", npcid)
-        except KeyError:
-            # Hack for scripted event NPCs not present in npcs.json
-            self.notices.append(
-                "FavorNpc not found in npcs.json. Generating replacement."
-            )
-            name = npcid
-            for event in ("LiveNpc_", "NPC_Halloween_"):
-                name = separate_words(name.replace(event, ""))
-                break
-            self.npc = Npc(npcid, {"Name": name, "AreaName": area})
+        if self.data.get("FavorNpc"):
+            area, npcid = self.data["FavorNpc"].split("/")
+            try:
+                self.npc = get_content_by_id(Npc, npcid)
+            except KeyError:
+                # Hack for scripted event NPCs not present in npcs.json
+                self.notices.append(
+                    "FavorNpc not found in npcs.json. Generating replacement."
+                )
+                name = npcid
+                for event in ("LiveNpc_", "NPC_Halloween_"):
+                    name = separate_words(name.replace(event, ""))
+                    break
+                self.npc = Npc(npcid, {"Name": name, "AreaName": area})
+        else:
+            self.npc = None
 
     def requirements_text(self):
         events = {
