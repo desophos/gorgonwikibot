@@ -180,7 +180,7 @@ class Quest(Content):
                     objectives.append(desc)
             elif k == "SuccessText":
                 source[k] = "{{Quote|%s}}" % v
-            elif k == "Reward_Favor":
+            elif k in ("Reward_Favor", "Rewards_Favor"):
                 rewards.append(f"{v} [[Favor]]")
             elif k == "Reward_Gold":
                 rewards.append(f"{v} councils")
