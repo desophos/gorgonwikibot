@@ -8,9 +8,12 @@ class Content:
     def __init__(self, id, data):
         self.id = id
         self.data = data
-        self.name = data.get("Name")  # for convenience
         self.errors = []
         self.notices = []
+
+    @property
+    def name(self):
+        return self.data.get("Name")
 
     @property
     def link(self):
@@ -40,7 +43,12 @@ class Skill(Content):
 
     def __init__(self, id, data):
         super().__init__(id, data)
-        self.name = self.name or self.id
+        # name doesn't change, so figure it out now
+        self._name = self.data.get("Name") or self.id
+
+    @property
+    def name(self):
+        return self._name
 
 
 class Npc(Content):
