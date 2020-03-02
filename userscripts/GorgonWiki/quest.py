@@ -228,25 +228,27 @@ class Quest(Content):
                 area.prefix = "the "
 
         return "".join(
-            "__NOTOC__\n",
-            source["Description"],
-            "\n\n",
-            linebreak_source("ReuseTime"),
-            "===Prerequisites===\n",
-            "To start this quest, talk to '''%s''' in %s'''%s'''. "
-            % (self.npc.link, area.prefix, area.link),
-            linebreak_source("Requirements"),
-            linebreak_source("PrefaceText"),
-            linebreak_source("MidwayText"),
-            "===Requirements===\n",
-            bullet_list(objectives),
-            "===Rewards===\n",
-            "{{Spoiler|Rewards|\n",
-            linebreak_source("SuccessText", "\n"),
-            bullet_list(rewards),
-            "}}\n\n",
-            "[[Category:Quests]]",
-            "[[Category:Quests/%s Quests]]" % area.name,
-            "[[Category:Quests/%s]]" % self.npc.name,
-            "\n",
+            (
+                "__NOTOC__\n",
+                source["Description"],
+                "\n\n",
+                linebreak_source("ReuseTime"),
+                "===Prerequisites===\n",
+                "To start this quest, talk to '''%s''' in %s'''%s'''. "
+                % (self.npc.link, areaprefix, arealink),
+                linebreak_source("Requirements"),
+                linebreak_source("PrefaceText"),
+                linebreak_source("MidwayText"),
+                "===Requirements===\n",
+                bullet_list(objectives),
+                "\n===Rewards===\n",
+                "{{Spoiler|Rewards|\n",
+                linebreak_source("SuccessText", "\n"),
+                bullet_list(rewards),
+                "}}\n\n",
+                "[[Category:Quests]]",
+                "[[Category:Quests/%s Quests]]" % areaname,
+                "[[Category:Quests/%s]]" % self.npc.name,
+                "\n",
+            )
         )
