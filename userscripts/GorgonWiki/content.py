@@ -86,6 +86,7 @@ class Area(Content):
 
 
 def separate_words(name):
+    """Convenience function for inserting spaces into CamelCase names."""
     return re.sub(r"(.)([A-Z])", r"\1 \2", name)
 
 
