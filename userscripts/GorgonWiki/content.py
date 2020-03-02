@@ -51,6 +51,21 @@ class Skill(Content):
         return self._name
 
 
+class Ability(Content):
+    datafile = "abilities"
+
+    def __init__(self, id, data):
+        super().__init__(id, data)
+
+    @property
+    def link(self):
+        skill = self.data.get("Skill")
+        if skill and skill != "Unknown":
+            return f"[[{skill}|{self.name}]]"
+        else:
+            return f"[[{self.name}]]"
+
+
 class Npc(Content):
     datafile = "npcs"
 
