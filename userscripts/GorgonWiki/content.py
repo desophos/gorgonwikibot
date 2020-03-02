@@ -10,12 +10,20 @@ class Content:
         self.data = data
         self.name = data.get("Name")  # for convenience
 
+    @property
+    def link(self):
+        return f"[[{self.name}]]"
+
 
 class Item(Content):
     datafile = "items"
 
     def __init__(self, id, data):
         super().__init__(id, data)
+
+    @property
+    def link(self):
+        return "{{Item|%s}}" % self.name
 
 
 class Recipe(Content):
