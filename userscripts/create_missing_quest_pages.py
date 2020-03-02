@@ -1,27 +1,7 @@
 import pywikibot
-from pywikibot.bot import (
-    SingleSiteBot, ExistingPageBot, NoRedirectPageBot, AutomaticTWSummaryBot)
-
-# debug stuff
-#from pprint import pprint
-import time
-
-from scripts.userscripts.GorgonWiki import RemoteData, WikiTools
-
-
-def get_wiki_template(name):
-    q = WikiTools.Quest(name.strip())
-    #print("*** Wiki template for quest " + name + "\n")
-    source = q.generate_wiki_source()
-    notices = q.get_notices()
-    if notices:
-        pywikibot.output("#################################### NOTICE:\n" + "\n".join(notices))
-    errors = q.get_errors()
-    if errors:
-        print("\n\nERRORS:")
-        print("\n".join(errors))
-        raise RuntimeError("Something is not right, see console output")
-    return source
+from userscripts.GorgonWiki.content import (get_all_content,
+                                            get_content_by_match)
+from userscripts.GorgonWiki.quest import Quest
 
 
 def main(*args):
@@ -32,7 +12,7 @@ def main(*args):
     offset = 0
 
     for arg in local_args:
-        option, sep, value = arg.partition(':')
+        option, sep, value = arg.partition(":")
         if option == "-dry-run":
             dry_run = True
         if option == "-quest":
@@ -42,50 +22,56 @@ def main(*args):
 
     # Get quest list
     if quest_filter:
-        quest_list = {"filtered": RemoteData.QuestList.find_quest_by_name(quest_filter)}
+        quests = [get_content_by_match(Quest, "Name", quest_filter)]
     else:
-        quest_list = RemoteData.QuestList.get_all()
-    quest_blacklist = ["quest_1", "quest_2"]
+        quests = get_all_content(Quest)
+
+    quest_blacklist = ["KillSkeletons", "VisitGravestones"]
 
     # Connect to API
     site = pywikibot.Site()
     current_offset = 0
 
-    for index in quest_list:
+    for quest in quests[offset:]:
         current_offset += 1
-        if current_offset < offset:
-            continue  # Can I skip the first items of a dict smarter?
 
-        if index in quest_blacklist:
+        if quest.data["InternalName"] in quest_blacklist:
             continue
 
-        quest = quest_list[index]
-
-        if "Keywords" in quest:
+        if "Keywords" in quest.data and "WorkOrder" in quest.data["Keywords"]:
             # Skip work orders
-            if "WorkOrder" in quest["Keywords"]:
-                #pywikibot.output("Skipping work order quest")
-                continue
-        if not "FavorNpc" in quest:
-            pywikibot.output("Skipping quest without FavorNpc: {}".format(quest["Name"]))
+            # pywikibot.output("Skipping work order quest")
             continue
-        if quest["FavorNpc"] == "":
-            pywikibot.output("Skipping quest with empty FavorNpc: {}".format(quest["Name"]))
+        if "FavorNpc" not in quest.data:
+            pywikibot.output(f"Skipping quest without FavorNpc: {quest.name}")
+            continue
+        if quest.data["FavorNpc"] == "":
+            pywikibot.output(f"Skipping quest with empty FavorNpc: {quest.name}")
             continue
 
-        pywikibot.output('Loading %s...' % quest["Name"])
-        page = pywikibot.Page(site, quest["Name"])
-        if not page.exists():
-            pywikibot.output("Missing page for quest {}".format(quest["Name"]))
-            pywikibot.output("Current offset is {}".format(current_offset))
+        pywikibot.output(f"Loading {quest.name}...")
+        page = pywikibot.Page(site, quest.name)
 
-            page.text = get_wiki_template(quest["Name"])
+        if True:  # not page.exists():
+            pywikibot.output(f"Missing page for quest {quest.name}")
+            pywikibot.output(f"Current offset is {current_offset}")
+
+            page.text = quest.wiki_source()
+
+            if quest.notices:
+                pywikibot.output(
+                    "##################### NOTICE:\n" + "\n".join(quest.notices)
+                )
+            if quest.errors:
+                pywikibot.output("\n\nERRORS:\n" + "\n".join(quest.errors))
+                raise RuntimeError("Something is not right, see console output")
+
             if dry_run:
                 pywikibot.output("Dry-run mode")
                 pywikibot.output(page.text + "\n\n")
             else:
                 page.save(summary="Create quest page")
-                pywikibot.output("Page saved for quest {}".format(quest["Name"]))
+                pywikibot.output(f"Page saved for quest {quest.name}")
 
 
 if __name__ == "__main__":
