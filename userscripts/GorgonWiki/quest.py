@@ -246,11 +246,15 @@ class Quest(Content):
             (source.get("PrerequisiteFavorLevel", ""), source.get("Requirements", ""))
         ).strip()
         area = get_content_by_id(Area, self.npc.data["AreaName"])
+        areaname = area.name
+        arealink = area.link
+        areaprefix = area.prefix
         if "DisplayedLocation" in self.data:
             # Some areas have a good display location, some don't. Overwrite when we know it is nice.
             if self.data["DisplayedLocation"] == "Sacred Grotto":
-                area.name = self.data["DisplayedLocation"]
-                area.prefix = "the "
+                areaname = self.data["DisplayedLocation"]
+                arealink = f"[[{areaname}]]"
+                areaprefix = "the "
 
         return "".join(
             (
