@@ -134,7 +134,7 @@ class Quest(Content):
                 pass  # This might be interesting, but only used for guild quests atm?
             elif k == "RequirementsToSustain":
                 pass  # Probably used to auto-cancel quests after events like halloween
-            elif k in ("PreGiveItems", "PreGiveRecipes"):
+            elif k in ("PreGiveItems", "PreGiveRecipes", "PreGiveEffects"):
                 pass
             elif k == "Description":
                 source[k] = f"==Summary==\n{v.strip()}"
