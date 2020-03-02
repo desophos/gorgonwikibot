@@ -1,7 +1,7 @@
 import re
 from functools import lru_cache
 
-from userscripts.GorgonWiki import cdn
+from gorgonwikibot import cdn
 
 
 class Content:

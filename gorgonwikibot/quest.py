@@ -1,7 +1,6 @@
-from userscripts.GorgonWiki.content import (Ability, Area, Content, Item, Npc,
-                                            Recipe, Skill, get_content_by_id,
-                                            get_content_by_match,
-                                            separate_words)
+from gorgonwikibot.content import (Ability, Area, Content, Item, Npc, Recipe,
+                                   Skill, get_content_by_id,
+                                   get_content_by_match, separate_words)
 
 
 class Quest(Content):
