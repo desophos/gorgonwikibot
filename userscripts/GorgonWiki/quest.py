@@ -12,7 +12,9 @@ class Quest(Content):
 
         # Occasionally, quests with a single requirement use a dict instead of a one-item list.
         # Make it always a list for consistency and ease of processing.
-        if not isinstance(self.data["Requirements"], list):
+        if "Requirements" in self.data and not isinstance(
+            self.data["Requirements"], list
+        ):
             self.data["Requirements"] = [self.data["Requirements"]]
 
         if self.data.get("FavorNpc"):
