@@ -9,6 +9,8 @@ class Content:
         self.id = id
         self.data = data
         self.name = data.get("Name")  # for convenience
+        self.errors = []
+        self.notices = []
 
     @property
     def link(self):
@@ -33,22 +35,12 @@ class Recipe(Content):
         super().__init__(id, data)
 
 
-class Quest(Content):
+class Skill(Content):
     datafile = "skills"
 
     def __init__(self, id, data):
         super().__init__(id, data)
-
-        area, npcid = data["FavorNPC"].split("/")
-        try:
-            self.npc = get_content_by_id("npcs", npcid)
-        except KeyError:
-            # Hack for scripted event NPCs not present in npcs.json
-            name = npcid
-            for event in ("LiveNpc_", "NPC_Halloween_"):
-                name = separate_words(name.replace(event, ""))
-                break
-            self.npc = Npc(npcid, {"Name": name, "AreaName": area})
+        self.name = self.name or self.id
 
 
 class Npc(Content):

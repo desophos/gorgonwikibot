@@ -1,36 +1,33 @@
-
-class Quest:
-    def __init__(self, name):
-        self.name = name
-        self.errors = []
-        self.notices = []
-        self.summary = ""
-        self.summary_extra = ""
-        self.prereq = ""
-        self.preface = ""
-        self.midway_text = ""
-        self.objectives = ""
-        self.rewards = ""
-        self.success = ""
-
 from userscripts.GorgonWiki.content import (Content, Item, Npc, Recipe, Skill,
                                             get_content_by_id,
                                             get_content_by_match,
                                             separate_words)
 
+
+class Quest(Content):
+    datafile = "quests"
+
+    def __init__(self, id, data):
+        super().__init__(id, data)
+
+        # Occasionally, quests with a single requirement use a dict instead of a one-item list.
+        # Make it always a list for consistency and ease of processing.
+        if not isinstance(self.data["Requirements"], list):
+            self.data["Requirements"] = [self.data["Requirements"]]
+
+        area, npcid = data["FavorNPC"].split("/")
         try:
-            npc = NpcList.find_npc_by_ref(data["FavorNpc"])
+            self.npc = get_content_by_id("npcs", npcid)
         except KeyError:
-            self.errors.append("NPC not found")
-            npc = Npc(data["FavorNpc"], AreaList.find_by_areaname(data["DisplayedLocation"]))
-        area = npc.area
-        area_alias = area.get_alias()
-        area_prefix = area.get_prefix()
-        if "DisplayedLocation" in data:
-            # Some areas have a good display location, some don't. Overwrite when we know it is nice.
-            if data["DisplayedLocation"] == "Sacred Grotto":
-                area_alias = data["DisplayedLocation"]
-                area_prefix = "the "
+            # Hack for scripted event NPCs not present in npcs.json
+            self.notices.append(
+                "FavorNpc not found in npcs.json. Generating replacement."
+            )
+            name = npcid
+            for event in ("LiveNpc_", "NPC_Halloween_"):
+                name = separate_words(name.replace(event, ""))
+                break
+            self.npc = Npc(npcid, {"Name": name, "AreaName": area})
 
     def requirements_text(self):
         events = {
@@ -210,24 +207,6 @@ from userscripts.GorgonWiki.content import (Content, Item, Npc, Recipe, Skill,
                 rewards.append("random items")  # Special loot table for rewards
             else:
                 self.errors.append(f"Unhandled key: {k}")
-
-    def get_errors(self):
-        return self.errors
-
-    def get_notices(self):
-        return self.notices
-
-
-class Favor:
-    @staticmethod
-    def get_alias(name):
-        return re.sub(r'(.)([A-Z])', r'\1 \2', name)
-
-
-class Skill:
-    @staticmethod
-    def get_alias(name):
-        return re.sub(r'(.)([A-Z])', r'\1 \2', name)
 
         area = get_content_by_id("areas", self.npc.data["AreaName"])
         if "DisplayedLocation" in self.data:
