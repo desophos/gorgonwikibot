@@ -153,6 +153,11 @@ class Quest(Content):
                 source["ReuseTime"] = reuse_time(v, "hour")
             elif k == "Requirements":
                 source[k] = self.requirements_text()
+            elif k == "PrerequisiteFavorLevel":
+                # Only the Fiery Secrets quests have this
+                # keep line lengths short
+                text = "This quest is available at {{Favor|%s}} favor."
+                source[k] = text % separate_words(v)
             elif k == "PrefaceText":
                 source[k] = f"===Preface===\n{v.strip()}"
             elif k == "Objectives":
@@ -227,6 +232,9 @@ class Quest(Content):
                 self.errors.append(f"Unhandled key: {k}")
 
         area = get_content_by_id("areas", self.npc.data["AreaName"])
+        source["Requirements"] = " ".join(
+            (source.get("PrerequisiteFavorLevel", ""), source.get("Requirements", ""))
+        ).strip()
         if "DisplayedLocation" in self.data:
             # Some areas have a good display location, some don't. Overwrite when we know it is nice.
             if self.data["DisplayedLocation"] == "Sacred Grotto":
