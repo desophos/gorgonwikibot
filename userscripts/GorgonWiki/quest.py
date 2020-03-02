@@ -203,6 +203,11 @@ class Quest(Content):
                     rewards.append(
                         "%i XP in %s" % (xp, get_content_by_id(Skill, name).link)
                     )
+            elif k == "Rewards_Ability":
+                rewards.append(
+                    "Ability: %s"
+                    % get_content_by_match(Ability, "InternalName", v).link
+                )
             elif k == "Rewards":
                 # Rewards is a list, maybe sometimes a dict?
                 for reward in v:
