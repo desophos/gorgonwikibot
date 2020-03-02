@@ -12,16 +12,22 @@ class Content:
 
 
 class Item(Content):
+    datafile = "items"
+
     def __init__(self, id, data):
         super().__init__(id, data)
 
 
 class Recipe(Content):
+    datafile = "recipes"
+
     def __init__(self, id, data):
         super().__init__(id, data)
 
 
 class Quest(Content):
+    datafile = "skills"
+
     def __init__(self, id, data):
         super().__init__(id, data)
 
@@ -38,6 +44,8 @@ class Quest(Content):
 
 
 class Npc(Content):
+    datafile = "npcs"
+
     def __init__(self, id, data):
         super().__init__(id, data)
         self.ref = data["AreaName"] + "/" + self.name
@@ -45,6 +53,8 @@ class Npc(Content):
 
 class Area(Content):
     """Allows to alias an area if the wiki uses a different name than the data files"""
+
+    datafile = "areas"
 
     def __init__(self, id, data):
         super().__init__(id, data)
@@ -66,28 +76,19 @@ class Area(Content):
             return ""
 
 
-file2cls = {
-    "areas": Area,
-    "npcs": Npc,
-    "items": Item,
-    "recipes": Recipe,
-    "quests": Quest,
-}
-
-
 def separate_words(name):
     return re.sub(r"(.)([A-Z])", r"\1 \2", name)
 
 
 @lru_cache
-def get_content_by_id(which, id):
-    data = cdn.get_file(which)
-    return file2cls[which](id, data[id])
+def get_content_by_id(cls, id):
+    data = cdn.get_file(cls.datafile)
+    return cls(id, data[id])
 
 
 @lru_cache
-def get_content_by_match(which, matchkey, matchval):
-    data = cdn.get_file(which)
+def get_content_by_match(cls, matchkey, matchval):
+    data = cdn.get_file(cls.datafile)
     for k, v in data.items():
         if v[matchkey] == matchval:
-            return file2cls[which](k, v)
+            return cls(k, v)
