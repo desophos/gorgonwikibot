@@ -1,7 +1,7 @@
 import re
 
 import pywikibot
-from GorgonWiki.RemoteData import Cdn
+from userscripts.GorgonWiki import cdn
 
 
 def is_player_minigolem(name):
@@ -46,7 +46,7 @@ def get_abilities(cdn):
     }
 
 
-def get_ais(cdn):
+def get_ais():
     return {
         name: [
             ability
@@ -58,15 +58,15 @@ def get_ais(cdn):
     }
 
 
-def generate_profiles(cdn):
+def generate_profiles():
     """'''AIP:Kraken'''
     : {{Combat Ability|KrakenBeak}}
     : {{Combat Ability|KrakenSlam}}
     : {{Combat Ability Rage|KrakenRage}}
     <noinclude>[[Category:AI Profile]]</noinclude>
     """
-    ais = get_ais(cdn)
-    abilities = get_abilities(cdn)
+    ais = get_ais()
+    abilities = get_abilities()
     profiles = {}
     for ai, alist in ais.items():
         # ignore abilities that have already been filtered out
@@ -81,16 +81,15 @@ def generate_profiles(cdn):
                     nonrages.append(a)
             # we want all nonrages before all rages
             for a in nonrages:
-                profile += f": {{{{Combat Ability|{a}}}}}\n"
+                profile += ": {{Combat Ability|%s}}\n" % a
             for a in rages:
-                profile += f": {{{{Combat Ability Rage|{a}}}}}\n"
+                profile += ": {{Combat Ability Rage|%s}}\n" % a
             profile += "<noinclude>[[Category:AI Profile]]</noinclude>"
             profiles[ai] = profile
     return profiles
 
 
 def main(*args):
-    cdn = Cdn()
     local_args = pywikibot.handle_args(args)
     dry_run = False
 
@@ -103,7 +102,7 @@ def main(*args):
         pywikibot.output("Dry-run mode, not creating pages...\n")
 
     site = pywikibot.Site()
-    for name, profile in generate_profiles(cdn).items():
+    for name, profile in generate_profiles().items():
         title = f"AIP:{name}"
         page = pywikibot.Page(site, title)
         if page.text == profile:
