@@ -83,6 +83,11 @@ def separate_words(name):
 
 
 @lru_cache
+def get_all_content(cls):
+    return [cls(id, data) for id, data in cdn.get_file(cls.datafile).items()]
+
+
+@lru_cache
 def get_content_by_id(cls, id):
     data = cdn.get_file(cls.datafile)
     return cls(id, data[id])
