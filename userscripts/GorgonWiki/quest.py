@@ -52,26 +52,31 @@ class Quest(Content):
 
         def helper(reqdata):
             reqs = []
+
             for req in reqdata:
                 reqtype = req["T"]
 
                 if reqtype == "Or":
                     reqs.extend(helper(req["List"]))
+
                 elif reqtype == "MinFavorLevel":
                     reqs.append(
                         "This quest is available at {{Favor|%s}} favor."
                         % separate_words(req["Level"])
                     )
+
                 elif reqtype == "MinSkillLevel":
                     reqs.append(
                         "This quest is available at %s level %s."
                         % (get_content_by_id(Skill, req["Skill"]).link, req["Level"])
                     )
+
                 elif reqtype in ("QuestCompleted", "GuildQuestCompleted"):
                     reqs.append(
                         "You must have previously completed %s in order to undertake this quest."
                         % get_content_by_match(Quest, "InternalName", req["Quest"]).link
                     )
+
                 elif reqtype == "HasEffectKeyword" and "Keyword" in req:
                     try:
                         reqs.append(
@@ -79,6 +84,7 @@ class Quest(Content):
                         )
                     except KeyError as e:
                         self.errors.append(f"Unknown event: {e}")
+
                 else:
                     try:
                         reqs.append(
@@ -86,6 +92,7 @@ class Quest(Content):
                         )
                     except KeyError as e:
                         self.errors.append(f"Unknown requirement: {e}")
+
                 return reqs
 
         requirements = self.data["Requirements"]
@@ -116,6 +123,7 @@ class Quest(Content):
             return source[key] + suffix if key in source else ""
 
         for k, v in self.data.items():
+
             if k in ("InternalName", "IsCancellable", "Name", "Version"):
                 pass  # Tech stuff
             elif k in ("FavorNpc", "DisplayedLocation"):
@@ -138,33 +146,43 @@ class Quest(Content):
                 pass  # Probably used to auto-cancel quests after events like halloween
             elif k in ("PreGiveItems", "PreGiveRecipes", "PreGiveEffects"):
                 pass
+
             elif k == "Description":
                 source[k] = f"==Summary==\n{v.strip()}"
+
             elif k == "MidwayText":
                 if v:  # Fiery Secrets has empty MidwayText
                     source[k] = f"===Midway===\n{v.strip()}"
+
             elif k == "MidwayGiveItems":
                 source[k] = "[%s]" % " ".join(
                     "You receive %s."
                     % get_content_by_match(Item, "InternalName", item["Item"]).link
                     for item in v
                 )
+
             elif k == "ReuseTime_Days":
                 source["ReuseTime"] = reuse_time(v, "day")
+
             elif k == "ReuseTime_Hours":
                 source["ReuseTime"] = reuse_time(v, "hour")
+
             elif k == "Requirements":
                 source[k] = self.requirements_text()
+
             elif k == "PrerequisiteFavorLevel":
                 # Only the Fiery Secrets quests have this
                 # keep line lengths short
                 text = "This quest is available at {{Favor|%s}} favor."
                 source[k] = text % separate_words(v)
+
             elif k == "PrefaceText":
                 source[k] = f"===Preface===\n{v.strip()}"
+
             elif k == "Objectives":
                 for obj in self.data["Objectives"]:
                     desc = obj["Description"]
+
                     if obj["Type"] == "Collect" and "ItemName" in obj:
                         item = get_content_by_match(
                             Item, "InternalName", obj["ItemName"]
@@ -180,18 +198,23 @@ class Quest(Content):
                             desc += f" x{n}"
 
                     objectives.append(desc)
+
             elif k == "SuccessText":
                 source[k] = "{{Quote|%s}}" % v
+
             elif k in ("Reward_Favor", "Rewards_Favor"):
                 rewards.append(f"{v} [[Favor]]")
+
             elif k == "Reward_Gold":
                 rewards.append(f"{v} councils")
+
             elif k == "Rewards_Currency":
                 for curr, amt in v.items():
                     try:
                         rewards.append(f"{amt} {currencies[curr]}")
                     except KeyError as e:
                         self.errors.append(f"Unknown reward currency: {e}")
+
             elif k == "Rewards_Items":
                 for item in v:
                     reward = get_content_by_match(
@@ -200,16 +223,19 @@ class Quest(Content):
                     if item["StackSize"] > 1:
                         reward += f" x{item['StackSize']}"
                     rewards.append(reward)
+
             elif k == "Rewards_XP":
                 for name, xp in v.items():
                     rewards.append(
                         "%i XP in %s" % (xp, get_content_by_id(Skill, name).link)
                     )
+
             elif k == "Rewards_Ability":
                 rewards.append(
                     "Ability: %s"
                     % get_content_by_match(Ability, "InternalName", v).link
                 )
+
             elif k == "Rewards":
                 for reward in v:
                     if reward["T"] in ("SkillXP", "SkillXp"):  # Inconsistent uppercase
@@ -235,18 +261,22 @@ class Quest(Content):
                         rewards.append(f"{reward['Credits']} Guild Credits")
                     else:
                         self.errors.append(f"Unexpected reward type: {reward['T']}")
+
             elif k == "Rewards_Effects":
                 self.notices.append(
                     f"Special reward effects must be handled manually: {v}"
                 )
+
             elif k == "Rewards_NamedLootProfile":
                 rewards.append("random items")  # Special loot table for rewards
+
             else:
                 self.errors.append(f"Unhandled key: {k}")
 
         source["Requirements"] = " ".join(
             (source.get("PrerequisiteFavorLevel", ""), source.get("Requirements", ""))
         ).strip()
+
         area = get_content_by_id(Area, self.npc.data["AreaName"])
         areaname = area.name
         arealink = area.link
