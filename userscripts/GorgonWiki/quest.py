@@ -141,6 +141,12 @@ class Quest(Content):
             elif k == "MidwayText":
                 if v:  # Fiery Secrets has empty MidwayText
                     source[k] = f"===Midway===\n{v.strip()}"
+            elif k == "MidwayGiveItems":
+                source[k] = "[%s]" % " ".join(
+                    "You receive %s."
+                    % get_content_by_match(Item, "InternalName", item["Item"]).link
+                    for item in v
+                )
             elif k == "ReuseTime_Days":
                 source["ReuseTime"] = reuse_time(v, "day")
             elif k == "ReuseTime_Hours":
@@ -239,6 +245,7 @@ class Quest(Content):
                 linebreak_source("Requirements"),
                 linebreak_source("PrefaceText"),
                 linebreak_source("MidwayText"),
+                linebreak_source("MidwayGiveItems"),
                 "===Requirements===\n",
                 bullet_list(objectives),
                 "\n===Rewards===\n",
