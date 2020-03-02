@@ -242,10 +242,10 @@ class Quest(Content):
             else:
                 self.errors.append(f"Unhandled key: {k}")
 
-        area = get_content_by_id("areas", self.npc.data["AreaName"])
         source["Requirements"] = " ".join(
             (source.get("PrerequisiteFavorLevel", ""), source.get("Requirements", ""))
         ).strip()
+        area = get_content_by_id(Area, self.npc.data["AreaName"])
         if "DisplayedLocation" in self.data:
             # Some areas have a good display location, some don't. Overwrite when we know it is nice.
             if self.data["DisplayedLocation"] == "Sacred Grotto":
