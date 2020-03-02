@@ -77,7 +77,8 @@ class Area(Content):
         else:
             return self.data.get("ShortFriendlyName", self._name)
 
-    def get_prefix(self):
+    @property
+    def prefix(self):
         if self.id in ("AreaCasino", "AreaDesert1", "AreaKurMountains", "AreaKurCaves"):
             return "the "
         else:
