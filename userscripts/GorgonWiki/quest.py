@@ -139,7 +139,8 @@ class Quest(Content):
             elif k == "Description":
                 source[k] = f"==Summary==\n{v.strip()}"
             elif k == "MidwayText":
-                source[k] = f"===Midway===\n{v.strip()}"
+                if v:  # Fiery Secrets has empty MidwayText
+                    source[k] = f"===Midway===\n{v.strip()}"
             elif k == "ReuseTime_Days":
                 source["ReuseTime"] = reuse_time(v, "day")
             elif k == "ReuseTime_Hours":
