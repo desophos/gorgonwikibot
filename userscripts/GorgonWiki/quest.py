@@ -198,6 +198,11 @@ class Quest(Content):
                     if item["StackSize"] > 1:
                         reward += f" x{item['StackSize']}"
                     rewards.append(reward)
+            elif k == "Rewards_XP":
+                for name, xp in v.items():
+                    rewards.append(
+                        "%i XP in %s" % (xp, get_content_by_id(Skill, name).link)
+                    )
             elif k == "Rewards":
                 # Rewards is a list, maybe sometimes a dict?
                 for reward in v:
