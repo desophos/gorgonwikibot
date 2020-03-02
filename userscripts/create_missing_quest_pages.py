@@ -1,28 +1,16 @@
+import sys
+
 import pywikibot
-from userscripts.GorgonWiki.content import (get_all_content,
-                                            get_content_by_match)
-from userscripts.GorgonWiki.quest import Quest
+from gorgonwikibot.content import get_all_content, get_content_by_match
+from gorgonwikibot.entrypoint import entrypoint
+from gorgonwikibot.quest import Quest
 
 
-def main(*args):
-    # Handle params
-    local_args = pywikibot.handle_args(args)
-    dry_run = False
-    quest_filter = None
-    offset = 0
-
-    for arg in local_args:
-        option, sep, value = arg.partition(":")
-        if option == "-dry-run":
-            dry_run = True
-        if option == "-quest":
-            quest_filter = value
-        if option == "-offset":
-            offset = int(value)
-
+@entrypoint
+def main(options):
     # Get quest list
-    if quest_filter:
-        quests = [get_content_by_match(Quest, "Name", quest_filter)]
+    if options.quest:
+        quests = [get_content_by_match(Quest, "Name", options.quest)]
     else:
         quests = get_all_content(Quest)
 
@@ -30,10 +18,10 @@ def main(*args):
 
     # Connect to API
     site = pywikibot.Site()
-    current_offset = 0
+    offset = options.offset
 
     for quest in quests[offset:]:
-        current_offset += 1
+        offset += 1
 
         if quest.data["InternalName"] in quest_blacklist:
             continue
@@ -51,28 +39,33 @@ def main(*args):
 
         pywikibot.output(f"Loading {quest.name}...")
         page = pywikibot.Page(site, quest.name)
+        source = quest.wiki_source()
 
-        if True:  # not page.exists():
+        if page.text == source:
+            pywikibot.output(f"No changes to {quest.name}\n")
+            continue
+
+        if not page.exists():
             pywikibot.output(f"Missing page for quest {quest.name}")
-            pywikibot.output(f"Current offset is {current_offset}")
 
-            page.text = quest.wiki_source()
+        pywikibot.output(f"Current offset is {offset}")
 
-            if quest.notices:
-                pywikibot.output(
-                    "##################### NOTICE:\n" + "\n".join(quest.notices)
-                )
-            if quest.errors:
-                pywikibot.output("\n\nERRORS:\n" + "\n".join(quest.errors))
-                raise RuntimeError("Something is not right, see console output")
+        page.text = source
 
-            if dry_run:
-                pywikibot.output("Dry-run mode")
-                pywikibot.output(page.text + "\n\n")
-            else:
-                page.save(summary="Create quest page")
-                pywikibot.output(f"Page saved for quest {quest.name}")
+        if quest.notices:
+            pywikibot.output(
+                "##################### NOTICE:\n" + "\n".join(quest.notices)
+            )
+        if quest.errors:
+            pywikibot.output("\n\nERRORS:\n" + "\n".join(quest.errors))
+            raise RuntimeError("Something is not right, see console output")
+
+        if options.dry:
+            pywikibot.output(page.text + "\n\n")
+        else:
+            page.save(summary="Create quest page")
+            pywikibot.output(f"Page saved for quest {quest.name}")
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

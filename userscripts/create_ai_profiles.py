@@ -1,7 +1,9 @@
 import re
+import sys
 
 import pywikibot
-from userscripts.GorgonWiki import cdn
+from gorgonwikibot import cdn
+from gorgonwikibot.entrypoint import entrypoint
 
 
 def is_player_minigolem(name):
@@ -89,18 +91,8 @@ def generate_profiles():
     return profiles
 
 
-def main(*args):
-    local_args = pywikibot.handle_args(args)
-    dry_run = False
-
-    for arg in local_args:
-        option, sep, value = arg.partition(":")
-        if option == "-dry-run":
-            dry_run = True
-
-    if dry_run:
-        pywikibot.output("Dry-run mode, not creating pages...\n")
-
+@entrypoint
+def main(options):
     site = pywikibot.Site()
     for name, profile in generate_profiles().items():
         title = f"AIP:{name}"
@@ -109,11 +101,11 @@ def main(*args):
             pywikibot.output(f"No changes to {title}\n")
             continue
         page.text = profile
-        if dry_run:
+        if options.dry:
             pywikibot.output(f"{title}\n{page.text}\n")
         else:
             page.save(summary="Create AI Profile page")
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

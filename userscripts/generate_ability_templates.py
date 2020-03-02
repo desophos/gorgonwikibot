@@ -1,4 +1,6 @@
-from userscripts.create_ai_profiles import get_abilities
+import sys
+
+from scripts.create_ai_profiles import get_abilities
 
 
 def write_template(abilities, key, filename):
@@ -13,4 +15,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
