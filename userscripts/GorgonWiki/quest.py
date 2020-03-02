@@ -103,8 +103,10 @@ class Quest(Content):
         rewards = []
 
         def reuse_time(num, timespan):
-            return "This quest can be repeated after {} {}{}.".format(
-                num, timespan, "" if num == 1 else "s"
+            return "This quest can be repeated after %i %s%s." % (
+                num,
+                timespan,
+                "" if num == 1 else "s",
             )
 
         def bullet_list(items):
