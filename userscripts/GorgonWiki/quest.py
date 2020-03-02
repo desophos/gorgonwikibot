@@ -1,5 +1,5 @@
-from userscripts.GorgonWiki.content import (Content, Item, Npc, Recipe, Skill,
-                                            get_content_by_id,
+from userscripts.GorgonWiki.content import (Ability, Area, Content, Item, Npc,
+                                            Recipe, Skill, get_content_by_id,
                                             get_content_by_match,
                                             separate_words)
 
