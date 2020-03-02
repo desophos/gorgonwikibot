@@ -88,7 +88,13 @@ class Quest(Content):
                         self.errors.append(f"Unknown requirement: {e}")
                 return reqs
 
-        return " ".join(helper(self.data["Requirements"]))
+        requirements = self.data["Requirements"]
+        if isinstance(requirements[0], list):
+            # in a few christmas quests, for no apparent reason,
+            # Requirements has an extra nested list
+            requirements = requirements[0]
+
+        return " ".join(helper(requirements))
 
     def wiki_source(self):
         currencies = {"WardenPoints": "Warden Points", "Gold": "councils"}
