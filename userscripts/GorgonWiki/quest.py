@@ -108,7 +108,7 @@ class Quest(Content):
             )
 
         def bullet_list(items):
-            return map(lambda s: f"* {s}\n", items)
+            return "".join(map(lambda s: f"* {s}\n", items))
 
         def linebreak_source(key, suffix="\n\n"):
             return source[key] + suffix if key in source else ""
