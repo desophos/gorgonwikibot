@@ -17,39 +17,6 @@ class Quest:
     def description(self, text):
         self.summary = "==Summary==\n" + text + "\n\n"
 
-    def requirements(self, data):
-        print(data)
-        for req in data:
-            if req["T"] == "MinFavorLevel":
-                self.prereq += " The quest is available at {{Favor|%s}} favor." % Favor.get_alias(req["Level"])
-            elif req["T"] == "MinSkillLevel":
-                self.prereq += " This quest is available at [[%s]] level %s." % (Skill.get_alias(req["Skill"]), req["Level"])
-            elif req["T"] == "QuestCompleted":
-                other_quest_name = QuestList.find_quest_by_internalname(req["Quest"])["Name"]
-                self.prereq += " You must have previously completed [[%s]] in order to undertake this quest." % other_quest_name
-            elif req["T"] == "HasEffectKeyword" and req["Keyword"] == "LiveEvent_Crafting":
-                self.prereq += " This quest is only available during a Crafting Caravan event."
-            elif req["T"] == "IsWarden":
-                self.prereq += " This quest is only available for Wardens."
-            elif req["T"] == "AreaEventOn":
-                self.prereq += " This quest is only available during an event in the area."
-                # check req["AreaEvent"]
-            elif req["T"] == "HangOutCompleted":
-                self.prereq += " This quest is only available after completing a hangout."
-                # check req["HangOut"]
-            elif req["T"] == "InteractionFlagSet":
-                # check req["InteractionFlag"]
-                self.prereq += " This quest is only available after an interaction."
-            elif req["T"] == "GuildQuestCompleted":
-                other_quest_name = QuestList.find_quest_by_internalname(req["Quest"])["Name"]
-                self.prereq += " You must have previously completed [[%s]] in order to undertake this quest." % other_quest_name
-            elif req["T"] == "Or":
-                # Hopefully this is only used for event quests
-                self.notices.append("Or-Requirement needs manual check")
-            elif req["T"] == "IsLongtimeAnimal":
-                self.prereq += " This quest is only available to long time animals."
-            else:
-                self.errors.append("Unknown requirement type " + req["T"])
     
     def generate_wiki_source(self):
         self.errors = []
@@ -71,6 +38,62 @@ class Quest:
 
         for key in data:
             if key == "InternalName" or key == "IsCancellable" or key == "Name" or key == "Version":
+    def requirements_text(self):
+        events = {
+            "LiveEvent_Crafting": "a Crafting Caravan event",
+            "Event_Christmas": "Christmas",
+            "LiveEvent_CivilService": "a Civil Service event",
+            "LiveEvent_BunFu": "a Bun-Fu event",
+        }
+
+        restrictions = {
+            "IsWarden": "for Wardens",
+            "AreaEventOn": "during an event in the area",  # check req["AreaEvent"]
+            "HangOutCompleted": "after completing a hangout",  # check req["HangOut"]
+            "InteractionFlagSet": "after an interaction",  # check req["InteractionFlag"]
+            "IsLongtimeAnimal": "to long time animals",
+        }
+
+        def helper(reqdata):
+            reqs = []
+            for req in reqdata:
+                reqtype = req["T"]
+
+                if reqtype == "Or":
+                    reqs.extend(helper(req["List"]))
+                elif reqtype == "MinFavorLevel":
+                    reqs.append(
+                        "The quest is available at {{Favor|%s}} favor."
+                        % separate_words(req["Level"])
+                    )
+                elif reqtype == "MinSkillLevel":
+                    reqs.append(
+                        "This quest is available at %s level %s."
+                        % (get_content_by_id(Skill, req["Skill"]).link, req["Level"])
+                    )
+                elif reqtype in ("QuestCompleted", "GuildQuestCompleted"):
+                    reqs.append(
+                        "You must have previously completed %s in order to undertake this quest."
+                        % get_content_by_match(Quest, "InternalName", req["Quest"]).link
+                    )
+                elif reqtype == "HasEffectKeyword" and "Keyword" in req:
+                    try:
+                        reqs.append(
+                            f"This quest is only available during {events[req['Keyword']]}."
+                        )
+                    except KeyError as e:
+                        self.errors.append(f"Unknown event: {e}")
+                else:
+                    try:
+                        reqs.append(
+                            f"This quest is only available {restrictions[reqtype]}."
+                        )
+                    except KeyError as e:
+                        self.errors.append(f"Unknown requirement: {e}")
+                return reqs
+
+        return " ".join(helper(self.data["Requirements"]))
+
                 pass  # Tech stuff
             elif key == "FavorNpc" or key == "DisplayedLocation":
                 pass  # NPC is handled above
