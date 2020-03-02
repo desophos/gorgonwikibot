@@ -1,5 +1,16 @@
+# Project-specific exclusions
+*.txt
+*.ps1
+*.log
+*.sublime-*
+*.ctrl
+*.lwp
+user-*.py
+logs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
+apicache*/
 *.py[cod]
 *$py.class
 
