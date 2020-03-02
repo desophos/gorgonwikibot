@@ -24,7 +24,7 @@ def is_scaled(ability, params):
     )
 
 
-def get_abilities(cdn):
+def get_abilities():
     include = [
         "PetUndeadArrow1",
         # "PetUndeadArrow2",  # no description
