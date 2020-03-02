@@ -218,6 +218,8 @@ class Quest(Content):
                                 get_content_by_id(Skill, reward["Skill"]).link,
                             )
                         )
+                    elif reward["T"] == "CombatXp":
+                        rewards.append(f"{reward['Xp']} XP in active combat skills")
                     elif reward["T"] == "Recipe":
                         rewards.append(
                             "Recipe: %s"
