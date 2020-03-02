@@ -1,4 +1,3 @@
-from .RemoteData import *
 
 class Quest:
     def __init__(self, name):
@@ -14,13 +13,10 @@ class Quest:
         self.rewards = ""
         self.success = ""
 
-    def description(self, text):
-        self.summary = "==Summary==\n" + text + "\n\n"
-
-    
-    def generate_wiki_source(self):
-        self.errors = []
-        data = QuestList.find_quest_by_name(self.name)
+from userscripts.GorgonWiki.content import (Content, Item, Npc, Recipe, Skill,
+                                            get_content_by_id,
+                                            get_content_by_match,
+                                            separate_words)
 
         try:
             npc = NpcList.find_npc_by_ref(data["FavorNpc"])
@@ -36,8 +32,6 @@ class Quest:
                 area_alias = data["DisplayedLocation"]
                 area_prefix = "the "
 
-        for key in data:
-            if key == "InternalName" or key == "IsCancellable" or key == "Name" or key == "Version":
     def requirements_text(self):
         events = {
             "LiveEvent_Crafting": "a Crafting Caravan event",
@@ -94,111 +88,128 @@ class Quest:
 
         return " ".join(helper(self.data["Requirements"]))
 
+    def wiki_source(self):
+        currencies = {"WardenPoints": "Warden Points", "Gold": "councils"}
+        source = {}
+        objectives = []
+        rewards = []
+
+        def reuse_time(num, timespan):
+            return "This quest can be repeated after {} {}{}.".format(
+                num, timespan, "" if num == 1 else "s"
+            )
+
+        def bullet_list(items):
+            return map(lambda s: f"* {s}\n", items)
+
+        def linebreak_source(key, suffix="\n\n"):
+            return source[key] + suffix if key in source else ""
+
+        for k, v in self.data.items():
+            if k in ("InternalName", "IsCancellable", "Name", "Version"):
                 pass  # Tech stuff
-            elif key == "FavorNpc" or key == "DisplayedLocation":
+            elif k in ("FavorNpc", "DisplayedLocation"):
                 pass  # NPC is handled above
-            elif key == "TSysLevel":
+            elif k == "TSysLevel":
                 pass  # Not sure what that is. I don't think we should display it.
-            elif key == "GroupingName":
+            elif k == "GroupingName":
                 pass  # Tech value to group quests so you can only have one of the group. Like casino daily.
-            elif key == "IsGuildQuest" or key == "NumExpectedParticipants" or key == "IsAutoWrapUp" or key == "IsAutoPreface" or key == "ReuseTime_Minutes":
+            elif k in (
+                "IsGuildQuest",
+                "NumExpectedParticipants",
+                "IsAutoWrapUp",
+                "IsAutoPreface",
+                "ReuseTime_Minutes",
+            ):
                 pass  # Guild quest stuff
-            elif key == "Keywords":
+            elif k == "Keywords":
                 pass  # This might be interesting, but only used for guild quests atm?
-            elif key == "RequirementsToSustain":
+            elif k == "RequirementsToSustain":
                 pass  # Probably used to auto-cancel quests after events like halloween
-            elif key == "PreGiveItems" or key == "PreGiveRecipes":
+            elif k in ("PreGiveItems", "PreGiveRecipes"):
                 pass
-            elif key == "Description":
-                self.description(data[key])
-            elif key == "MidwayText":
-                self.midway_text = "===Midway===\n" + data["MidwayText"].strip() + "\n\n"
-            elif key == "ReuseTime_Days":
-                self.summary_extra += "This Quest can be repeated after {} day{}.\n\n".format(data["ReuseTime_Days"], '' if data["ReuseTime_Days"] == 1 else 's')
-            elif key == "ReuseTime_Hours":
-                self.summary_extra += "This Quest can be repeated after {} hour{}.\n\n".format(data["ReuseTime_Hours"], '' if data["ReuseTime_Hours"] == 1 else 's')
-            elif key == "Requirements":
-                if type(data["Requirements"][0]) is list:
-                    # This is a AND combination of sub-requirements
-                    for item in data["Requirements"]:
-                        self.requirements(item)
-                else:
-                    self.requirements(data["Requirements"])
-            elif key == "PrefaceText":
-                self.preface = "===Preface===\n" + data["PrefaceText"].strip() + "\n\n"
-            elif key == "Objectives":
-                for item in data["Objectives"]:
-                    linked_desc = item["Description"]
-                    if item["Type"] == "Collect" and item["ItemName"]:
-                        name = Item.get_name_for_internal(item["ItemName"])
-                        linked_desc = linked_desc.replace(name, "{{Item|" + name + "}}")
-                    self.objectives += "* " + linked_desc
-                    if "Number" in item and item["Number"] > 1 and item["Description"].find(str(item["Number"])) == -1:
-                        self.objectives += " x%i" % item["Number"]
-                    self.objectives += "\n"
-            elif key == "SuccessText":
-                self.success = "{{Quote|" + data["SuccessText"] + "}}\n"
-            elif key == "Reward_Favor":
-                self.rewards += "* %i {{Favor|favor}}\n" % data["Reward_Favor"]
-            elif key == "Reward_Gold":
-                self.rewards += "* %i councils\n" % data["Reward_Gold"]
-            elif key == "Rewards_Currency":
-                for curr in data["Rewards_Currency"]:
-                    if curr == "WardenPoints":
-                        self.rewards += "* %i Warden Points\n" % data["Rewards_Currency"]["WardenPoints"]
-                    elif curr == "Gold":
-                        self.rewards += "* %i councils\n" % data["Rewards_Currency"]["Gold"]
+            elif k == "Description":
+                source[k] = f"==Summary==\n{v.strip()}"
+            elif k == "MidwayText":
+                source[k] = f"===Midway===\n{v.strip()}"
+            elif k == "ReuseTime_Days":
+                source["ReuseTime"] = reuse_time(v, "day")
+            elif k == "ReuseTime_Hours":
+                source["ReuseTime"] = reuse_time(v, "hour")
+            elif k == "Requirements":
+                source[k] = self.requirements_text()
+            elif k == "PrefaceText":
+                source[k] = f"===Preface===\n{v.strip()}"
+            elif k == "Objectives":
+                for obj in self.data["Objectives"]:
+                    desc = obj["Description"]
+                    if obj["Type"] == "Collect" and "ItemName" in obj:
+                        item = get_content_by_match(
+                            Item, "InternalName", obj["ItemName"]
+                        )
+                        desc = desc.replace(item.name, item.link)
+
+                    try:
+                        n = obj["Number"]
+                    except KeyError:
+                        pass
                     else:
-                        self.errors.append("Unknown reward currency in " + data["InternalName"])
-            elif key == "Rewards_Items":
-                for item in data["Rewards_Items"]:
-                    self.rewards += "* {{Item|" + Item.get_name_for_internal(item["Item"]) + "}}"
+                        if n > 1 and desc.find(str(n)) == -1:
+                            desc += f" x{n}"
+
+                    objectives.append(desc)
+            elif k == "SuccessText":
+                source[k] = "{{Quote|%s}}" % v
+            elif k == "Reward_Favor":
+                rewards.append(f"{v} [[Favor]]")
+            elif k == "Reward_Gold":
+                rewards.append(f"{v} councils")
+            elif k == "Rewards_Currency":
+                for curr, amt in v.items():
+                    try:
+                        rewards.append(f"{amt} {currencies[curr]}")
+                    except KeyError as e:
+                        self.errors.append(f"Unknown reward currency: {e}")
+            elif k == "Rewards_Items":
+                for item in v:
+                    reward = get_content_by_match(
+                        Item, "InternalName", item["Item"]
+                    ).link
                     if item["StackSize"] > 1:
-                        self.rewards += " x%i" % item["StackSize"]
-                    self.rewards += "\n"
-            elif key == "Rewards":
+                        reward += f" x{item['StackSize']}"
+                    rewards.append(reward)
+            elif k == "Rewards":
                 # Rewards is a list, maybe sometimes a dict?
-                for reward in data["Rewards"]:
-                    if reward["T"] == "SkillXP" or reward["T"] == "SkillXp":  # Inconsistent uppercase
-                        self.rewards += "* {} XP in {}\n".format(reward["Xp"], reward["Skill"])
+                for reward in v:
+                    if reward["T"] in ("SkillXP", "SkillXp"):  # Inconsistent uppercase
+                        rewards.append(
+                            "%i XP in %s"
+                            % (
+                                reward["Xp"],
+                                get_content_by_id(Skill, reward["Skill"]).link,
+                            )
+                        )
                     elif reward["T"] == "Recipe":
-                        self.rewards += "* Recipe: {}\n".format(RecipeList.find_by_name(reward["Recipe"]).name)
+                        rewards.append(
+                            "Recipe: %s"
+                            % get_content_by_match(
+                                Recipe, "InternalName", reward["Recipe"]
+                            ).link
+                        )
                     elif reward["T"] == "GuildXp":
-                        self.rewards += "* {} Guild XP\n".format(reward["Xp"])
+                        rewards.append(f"{reward['Xp']} Guild XP")
                     elif reward["T"] == "GuildCredits":
-                        self.rewards += "* {} Guild Credits\n".format(reward["Credits"])
+                        rewards.append(f"{reward['Credits']} Guild Credits")
                     else:
-                        self.errors.append("Unexpected reward type " + reward["T"])
-            elif key == "Rewards_Effects":
-                self.notices.append("Special reward effect for quest {} must be handled manually".format(data["InternalName"]))
-            elif key == "Rewards_NamedLootProfile":
-                self.rewards += "* random items\n"  # Special loot table for rewards
+                        self.errors.append(f"Unexpected reward type: {reward['T']}")
+            elif k == "Rewards_Effects":
+                self.notices.append(
+                    f"Special reward effects must be handled manually: {v}"
+                )
+            elif k == "Rewards_NamedLootProfile":
+                rewards.append("random items")  # Special loot table for rewards
             else:
-                self.errors.append("Unhandled key {} in quest data".format(key))
-
-        result = "__NOTOC__\n"
-        result += self.summary + self.summary_extra
-    
-        result += "===Prerequisites===\n"
-        result += "To start this quest, talk to '''[[%s]]''' in %s'''[[%s]]'''." % (npc.get_name(), area_prefix, area_alias)
-
-        result += self.prereq + "\n\n"
-        result += self.preface
-
-        result += self.midway_text
-
-        result += "===Requirements===\n"
-        result += self.objectives + "\n"
-
-        result += "===Rewards===\n"
-        result += "{{Spoiler|Rewards|\n"
-        result += self.success
-        result += self.rewards + "}}\n\n"
-
-        result += "[[Category:Quests]]"
-        result += "[[Category:Quests/%s Quests]]" % area_alias
-        result += "[[Category:Quests/%s]]" % npc.get_name()
-        return result + "\n"
+                self.errors.append(f"Unhandled key: {k}")
 
     def get_errors(self):
         return self.errors
@@ -218,3 +229,33 @@ class Skill:
     def get_alias(name):
         return re.sub(r'(.)([A-Z])', r'\1 \2', name)
 
+        area = get_content_by_id("areas", self.npc.data["AreaName"])
+        if "DisplayedLocation" in self.data:
+            # Some areas have a good display location, some don't. Overwrite when we know it is nice.
+            if self.data["DisplayedLocation"] == "Sacred Grotto":
+                area.name = self.data["DisplayedLocation"]
+                area.prefix = "the "
+
+        return "".join(
+            "__NOTOC__\n",
+            source["Description"],
+            "\n\n",
+            linebreak_source("ReuseTime"),
+            "===Prerequisites===\n",
+            "To start this quest, talk to '''%s''' in %s'''%s'''. "
+            % (self.npc.link, area.prefix, area.link),
+            linebreak_source("Requirements"),
+            linebreak_source("PrefaceText"),
+            linebreak_source("MidwayText"),
+            "===Requirements===\n",
+            bullet_list(objectives),
+            "===Rewards===\n",
+            "{{Spoiler|Rewards|\n",
+            linebreak_source("SuccessText", "\n"),
+            bullet_list(rewards),
+            "}}\n\n",
+            "[[Category:Quests]]",
+            "[[Category:Quests/%s Quests]]" % area.name,
+            "[[Category:Quests/%s]]" % self.npc.name,
+            "\n",
+        )
