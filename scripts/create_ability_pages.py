@@ -53,10 +53,16 @@ def generate_page(a):
 
 
 def generate_pages():
+    def learnable(a):
+        keywords = a.data.get("Keywords")
+        return "Lint_NotLearnable" not in keywords if keywords else True
+
     pages = {}
 
     for a in get_all_content(Ability):
-        if a.data.get("AttributesThatDeltaPowerCost"):  # player ability
+        if learnable(a) and a.data.get(
+            "AttributesThatDeltaPowerCost"
+        ):  # learnable player ability
             upgrade_of = a.data.get("UpgradeOf")
             if upgrade_of:
                 text = f"#redirect [[{upgrade_of}]]"
