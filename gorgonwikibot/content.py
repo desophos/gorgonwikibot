@@ -16,6 +16,10 @@ class Content:
         return self.data.get("Name")
 
     @property
+    def iname(self):
+        return self.data.get("InternalName")
+
+    @property
     def link(self):
         return f"[[{self.name}]]"
 
