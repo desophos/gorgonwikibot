@@ -17,7 +17,7 @@ def generate_infobox(a):
             f"| description = {a.data['Description']}",
             f"| skill = {a.data['Skill']}",
             f"| level = {a.data['Level']}",
-            f"| damage = {a.data['PvE']['Damage']} {a.data['DamageType']}",
+            f"| damage = {a.data['PvE'].get('Damage', 0)} {a.data['DamageType']}",
             f"| power cost = {a.data['PvE']['PowerCost']}",
             f"| reuse time = {a.data['ResetTime']}",
             f"| range = {a.data['PvE']['Range']} meters",
