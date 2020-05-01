@@ -128,6 +128,11 @@ def get_content_by_match(cls, matchkey, matchval):
             return cls(k, v)
 
 
-def get_name_from_internal(cls, internal):
-    """Convenience function for the common usage of finding the Name corresponding to an InternalName."""
-    return get_content_by_match(cls, "InternalName", internal).name
+def get_content_by_iname(cls, iname):
+    """Convenience wrapper for searching by InternalName."""
+    return get_content_by_match(cls, "InternalName", iname)
+
+
+def get_name_from_iname(cls, iname):
+    """Convenience wrapper for finding the Name corresponding to an InternalName."""
+    return get_content_by_iname(cls, iname).name
