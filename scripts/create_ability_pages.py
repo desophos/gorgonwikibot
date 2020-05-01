@@ -1,7 +1,7 @@
 import sys
 
 import pywikibot
-from gorgonwikibot.content import Ability, get_all_content
+from gorgonwikibot.content import Ability, get_all_content, get_name_from_iname
 from gorgonwikibot.entrypoint import entrypoint
 
 
@@ -65,7 +65,7 @@ def generate_pages():
         ):  # learnable player ability
             upgrade_of = a.data.get("UpgradeOf")
             if upgrade_of:
-                text = f"#redirect [[{upgrade_of}]]"
+                text = f"#redirect [[{get_name_from_iname(Ability, upgrade_of)}]]"
             else:
                 text = generate_page(a)
 
