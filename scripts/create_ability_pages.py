@@ -21,10 +21,15 @@ def generate_infobox(a):
             f"| power cost = {a.data['PvE']['PowerCost']}",
             f"| reuse time = {a.data['ResetTime']}",
             f"| range = {a.data['PvE']['Range']} meters",
-            "| keywords = "
-            + " ".join(map(lambda s: "{{KWAB|%s}}" % s, a.data["Keywords"])),
         ]
     )
+
+    if "Keywords" in a.data:
+        s = add_line(
+            s,
+            "| keywords = "
+            + " ".join(map(lambda s: "{{KWAB|%s}}" % s, a.data["Keywords"])),
+        )
 
     if "RageMultiplier" in a.data["PvE"]:
         s = add_line(s, f"| ragemulti = {a.data['PvE']['RageMultiplier']}")
