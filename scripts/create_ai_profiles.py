@@ -3,6 +3,8 @@ import sys
 
 import pywikibot
 from gorgonwikibot import cdn
+from gorgonwikibot.content import (Ability, get_all_content,
+                                   get_content_by_iname)
 from gorgonwikibot.entrypoint import entrypoint
 
 
@@ -10,21 +12,59 @@ def is_player_minigolem(name):
     return "Minigolem" in name and "Enemy" not in name
 
 
-def validate_name(name):
+def is_enemy(name):
     # no player pets or minigolems
     return not ("Pet" in name or is_player_minigolem(name))
 
 
-def is_scaled(ability, params):
+def is_valid_enemy_ability(a):
+    return (
+        is_enemy(a.name)
+        and "AttributesThatDeltaPowerCost" not in a.data  # no player abilities
+        and a.data["Description"]  # we only care about abilities with tooltips
+    )
+
+
+def get_abilities(validator, include=[]):
+    return {
+        a.iname: {
+            "Description": a.data["Description"],
+            "IconID": a.data["IconID"],
+            "Keywords": a.data.get("Keywords", []),
+        }
+        for a in get_all_content(Ability)
+        if a.iname in include or validator(a)
+    }
+
+
+def is_scaled(name, params):
     # some abilities have duplicates scaled to higher levels
     return (
         "minLevel" in params
         and params["minLevel"] > 1  # SnailRage and SpiderKill
-        and re.search(r"[B-Z2-9]$", ability)
+        and re.search(r"[B-Z2-9]$", name)
     )
 
 
-def get_abilities():
+def get_ais(validator):
+    return {
+        name: [
+            ability
+            for ability, params in v["Abilities"].items()
+            if not is_scaled(ability, params)
+        ]
+        for name, v in cdn.get_file("ai").items()
+        if validator(name)
+    }
+
+
+def generate_ai_profiles():
+    """'''AIP:Kraken'''
+    : {{Combat Ability|KrakenBeak}}
+    : {{Combat Ability|KrakenSlam}}
+    : {{Combat Ability Rage|KrakenRage}}
+    <noinclude>[[Category:AI Profile]]</noinclude>
+    """
     include = [
         "PetUndeadArrow1",
         # "PetUndeadArrow2",  # no description
@@ -34,42 +74,10 @@ def get_abilities():
         "MinigolemRageAcidToss4",
     ]  # special cases for SkeletonDistanceArcher and SecurityGolem
 
-    return {
-        a["InternalName"]: {
-            "Description": a["Description"],
-            "IconID": a["IconID"],
-            "Keywords": a.get("Keywords", []),
-        }
-        for a in cdn.get_file("abilities").values()
-        if a["InternalName"] in include  # special cases
-        or validate_name(a["InternalName"])
-        and "AttributesThatDeltaPowerCost" not in a  # no player abilities
-        and a["Description"]  # we only care about abilities with tooltips
-    }
-
-
-def get_ais():
-    return {
-        name: [
-            ability
-            for ability, params in v["Abilities"].items()
-            if not is_scaled(ability, params)
-        ]
-        for name, v in cdn.get_file("ai").items()
-        if validate_name(name)
-    }
-
-
-def generate_profiles():
-    """'''AIP:Kraken'''
-    : {{Combat Ability|KrakenBeak}}
-    : {{Combat Ability|KrakenSlam}}
-    : {{Combat Ability Rage|KrakenRage}}
-    <noinclude>[[Category:AI Profile]]</noinclude>
-    """
-    ais = get_ais()
-    abilities = get_abilities()
+    abilities = get_abilities(is_valid_enemy_ability, include)
+    ais = get_ais(is_enemy)
     profiles = {}
+
     for ai, alist in ais.items():
         # ignore abilities that have already been filtered out
         alist = list(filter(lambda a: a in abilities, alist))
