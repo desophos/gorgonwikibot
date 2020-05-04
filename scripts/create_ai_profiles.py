@@ -102,7 +102,7 @@ def generate_ai_profiles():
 @entrypoint
 def main(options):
     site = pywikibot.Site()
-    for name, profile in generate_profiles().items():
+    for name, profile in generate_ai_profiles().items():
         title = f"AIP:{name}"
         page = pywikibot.Page(site, title)
         if page.text == profile:
