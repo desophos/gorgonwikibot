@@ -34,8 +34,21 @@ def generate_infobox(a):
     if "RageMultiplier" in a.data["PvE"]:
         s = add_line(s, f"| ragemulti = {a.data['PvE']['RageMultiplier']}")
 
+    special = None
+
+    if "SpecialValues" in a.data["PvE"]:
+        special = " ".join(
+            " ".join(filter(None, [v["Label"], str(v["Value"]), v["Suffix"]])) + "."
+            for v in a.data["PvE"]["SpecialValues"]
+        )
+
     if "SpecialInfo" in a.data:
-        s = add_line(s, f"| special = {a.data['SpecialInfo']}")
+        info = a.data["SpecialInfo"]
+        info = info + "." if info[-1] != "." else info
+        special = " ".join([special, info]) if special else info
+
+    if special:
+        s = add_line(s, f"| special = {special}")
 
     s = add_line(s, "}}")
 
