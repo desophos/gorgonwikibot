@@ -17,12 +17,29 @@ def generate_infobox(a):
             f"| description = {a.data['Description']}",
             f"| skill = {a.data['Skill']}",
             f"| level = {a.data['Level']}",
-            f"| damage = {a.data['PvE'].get('Damage', 0)} {a.data['DamageType']}",
             f"| power cost = {a.data['PvE']['PowerCost']}",
             f"| reuse time = {a.data['ResetTime']}",
             f"| range = {a.data['PvE']['Range']} meters",
         ]
     )
+
+    damage_amt = a.data["PvE"].get("Damage", 0)
+    damage = f"{damage_amt} {a.data['DamageType']}"
+
+    dots = None
+
+    if "DoTs" in a.data["PvE"]:
+        for dot in a.data["PvE"]["DoTs"]:
+            if dot["DamagePerTick"] > 0:
+                dots = (
+                    f"{dot['DamagePerTick']} {dot['DamageType']} "
+                    f"{dot['NumTicks']} times over {dot['Duration']} seconds"
+                )
+
+    if dots:
+        damage = f"{damage} initially and {dots}" if damage_amt else dots
+
+    s = add_line(s, f"| damage = {damage}")
 
     if "Keywords" in a.data:
         s = add_line(
