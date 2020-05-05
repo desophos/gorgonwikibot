@@ -5,26 +5,20 @@ from gorgonwikibot.content import Ability, get_all_content, get_name_from_iname
 from gorgonwikibot.entrypoint import entrypoint
 
 
-def add_line(s, line):
-    return "\n".join([s, line])
-
-
 def generate_infobox(a):
     def pluralize(n, unit):
         return f"{n} {unit}{'' if n == 1 else 's'}"
 
-    s = "\n".join(
-        [
-            "{{Ability infobox",
-            f"| name = {a.name}",
-            f"| description = {a.data['Description']}",
-            f"| skill = {a.data['Skill']}",
-            f"| level = {a.data['Level']}",
-            f"| power cost = {a.data['PvE']['PowerCost']}",
-            f"| reuse time = {a.data['ResetTime']}",
-            f"| range = {a.data['PvE']['Range']} meters",
-        ]
-    )
+    s = [
+        "{{Ability infobox",
+        f"| name = {a.name}",
+        f"| description = {a.data['Description']}",
+        f"| skill = {a.data['Skill']}",
+        f"| level = {a.data['Level']}",
+        f"| power cost = {a.data['PvE']['PowerCost']}",
+        f"| reuse time = {a.data['ResetTime']}",
+        f"| range = {a.data['PvE']['Range']} meters",
+    ]
 
     damage_amt = a.data["PvE"].get("Damage", 0)
     damage = f"{damage_amt} {a.data['DamageType']}"
@@ -47,17 +41,15 @@ def generate_infobox(a):
     if dots:
         damage = f"{damage} initially and {dots}" if damage_amt else dots
 
-    s = add_line(s, f"| damage = {damage}")
+    s.append(f"| damage = {damage}")
 
     if "Keywords" in a.data:
-        s = add_line(
-            s,
-            "| keywords = "
-            + " ".join(map(lambda s: "{{KWAB|%s}}" % s, a.data["Keywords"])),
+        s.append(
+            "| keywords = " + " ".join("{{KWAB|%s}}" % s for s in a.data["Keywords"])
         )
 
     if "RageMultiplier" in a.data["PvE"]:
-        s = add_line(s, f"| ragemulti = {a.data['PvE']['RageMultiplier']}")
+        s.append(f"| ragemulti = {a.data['PvE']['RageMultiplier']}")
 
     special = None
 
@@ -73,11 +65,11 @@ def generate_infobox(a):
         special = " ".join([special, info]) if special else info
 
     if special:
-        s = add_line(s, f"| special = {special}")
+        s.append(f"| special = {special}")
 
-    s = add_line(s, "}}")
+    s.append("}}")
 
-    return s
+    return "\n".join(s)
 
 
 def generate_page(a):
