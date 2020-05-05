@@ -23,12 +23,6 @@ def generate_infobox(a):
         f"| range = {a.data['PvE']['Range']} meters",
     ]
 
-    damage_amt = a.data["PvE"].get(
-        "Damage", a.data["PvE"].get("HealthSpecificDamage", 0)
-    )
-    damage = f"{damage_amt} {a.data['DamageType']}" + (
-        " to health" if "HealthSpecificDamage" in a.data["PvE"] else ""
-    )
 
     dots = None
 
@@ -60,20 +54,30 @@ def generate_infobox(a):
                     ]
                 )
 
-    if dots:
-        damage = f"{damage} initially and {dots}" if damage_amt else dots
+    damage = ""
 
-    s.append(f"| damage = {damage}")
 
     if "Keywords" in a.data:
         s.append(
             "| keywords = " + " ".join("{{KWAB|%s}}" % s for s in a.data["Keywords"])
+    damage_amt = a.data["PvE"].get(
+        "Damage", a.data["PvE"].get("HealthSpecificDamage", 0)
+    )
+    if damage_amt:
+        damage = maybe_join(
+            [
+                str(damage_amt),
+                a.data["DamageType"],
+                "to health" if "HealthSpecificDamage" in a.data["PvE"] else "",
+            ]
         )
 
     if "RageMultiplier" in a.data["PvE"]:
         s.append(f"| ragemulti = {a.data['PvE']['RageMultiplier']}")
 
     special = None
+    if dots:
+        damage = f"{damage} initially and {dots}" if damage_amt else dots
 
     if "SpecialValues" in a.data["PvE"]:
         special = " ".join(
@@ -85,6 +89,8 @@ def generate_infobox(a):
         info = a.data["SpecialInfo"]
         info = info + "." if info[-1] != "." else info
         special = " ".join([special, info]) if special else info
+    if damage:
+        s.append(f"| damage = {damage}")
 
     if special:
         s.append(f"| special = {special}")
