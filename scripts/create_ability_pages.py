@@ -34,7 +34,22 @@ def generate_infobox(a):
 
     if "DoTs" in a.data["PvE"]:
         for dot in a.data["PvE"]["DoTs"]:
-            if dot["DamagePerTick"] > 0:
+            if "SpecialRules" in dot and "BuffActivated" in dot["SpecialRules"]:
+                pass
+            elif "Preface" in dot:
+                special = maybe_join(
+                    [
+                        special,
+                        " ".join(
+                            [
+                                dot["Preface"],
+                                str(dot["DamagePerTick"]),
+                                dot["DamageType"],
+                            ]
+                        ),
+                    ]
+                )
+            elif dot["DamagePerTick"] > 0:
                 dots = " ".join(
                     [
                         str(dot["DamagePerTick"]),
