@@ -23,9 +23,9 @@ def generate_infobox(a):
     damage_amt = a.data["PvE"].get(
         "Damage", a.data["PvE"].get("HealthSpecificDamage", 0)
     )
-    damage = f"{damage_amt} {a.data['DamageType']}"
-    if "HealthSpecificDamage" in a.data["PvE"]:
-        damage += " to health"
+    damage = f"{damage_amt} {a.data['DamageType']}" + (
+        " to health" if "HealthSpecificDamage" in a.data["PvE"] else ""
+    )
 
     dots = None
 
