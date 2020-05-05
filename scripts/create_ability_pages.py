@@ -9,6 +9,9 @@ def generate_infobox(a):
     def pluralize(n, unit):
         return f"{n} {unit}{'' if n == 1 else 's'}"
 
+    def maybe_join(xs, sep=" "):
+        return sep.join(filter(None, xs))
+
     s = [
         "{{Ability infobox",
         f"| name = {a.name}",
