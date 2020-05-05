@@ -20,8 +20,12 @@ def generate_infobox(a):
         f"| range = {a.data['PvE']['Range']} meters",
     ]
 
-    damage_amt = a.data["PvE"].get("Damage", 0)
+    damage_amt = a.data["PvE"].get(
+        "Damage", a.data["PvE"].get("HealthSpecificDamage", 0)
+    )
     damage = f"{damage_amt} {a.data['DamageType']}"
+    if "HealthSpecificDamage" in a.data["PvE"]:
+        damage += " to health"
 
     dots = None
 
