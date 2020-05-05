@@ -36,8 +36,8 @@ def generate_infobox(a):
             if dot["DamagePerTick"] > 0:
                 dots = " ".join(
                     [
-                        dot["DamagePerTick"],
-                        dot["DamageType"],
+                        str(dot["DamagePerTick"]),
+                        str(dot["DamageType"]),
                         pluralize(dot["NumTicks"], "time"),
                         "over",
                         pluralize(dot["Duration"], "second"),
