@@ -10,6 +10,9 @@ def add_line(s, line):
 
 
 def generate_infobox(a):
+    def pluralize(n, unit):
+        return f"{n} {unit}{'' if n == 1 else 's'}"
+
     s = "\n".join(
         [
             "{{Ability infobox",
@@ -31,9 +34,14 @@ def generate_infobox(a):
     if "DoTs" in a.data["PvE"]:
         for dot in a.data["PvE"]["DoTs"]:
             if dot["DamagePerTick"] > 0:
-                dots = (
-                    f"{dot['DamagePerTick']} {dot['DamageType']} "
-                    f"{dot['NumTicks']} times over {dot['Duration']} seconds"
+                dots = " ".join(
+                    [
+                        dot["DamagePerTick"],
+                        dot["DamageType"],
+                        pluralize(dot["NumTicks"], "time"),
+                        "over",
+                        pluralize(dot["Duration"], "second"),
+                    ]
                 )
 
     if dots:
