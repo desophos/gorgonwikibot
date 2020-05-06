@@ -120,9 +120,9 @@ def generate_pages():
 
     for a in get_all_content(Ability):
         if (
-            learnable(a)
+            a.data.get("AttributesThatDeltaPowerCost")
+            and learnable(a)
             or a.iname == "Punch"  # you start with this ability
-            and a.data.get("AttributesThatDeltaPowerCost")
         ):  # learnable player ability
             upgrade_of = a.data.get("UpgradeOf")
             if upgrade_of:
