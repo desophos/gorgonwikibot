@@ -112,7 +112,7 @@ def generate_page(a):
 
 
 def generate_pages():
-    def learnable(a):
+    def is_learnable(a):
         keywords = a.data.get("Keywords")
         return "Lint_NotLearnable" not in keywords if keywords else True
 
@@ -121,7 +121,7 @@ def generate_pages():
     for a in get_all_content(Ability):
         if (
             a.data.get("AttributesThatDeltaPowerCost")
-            and learnable(a)
+            and is_learnable(a)
             or a.iname == "Punch"  # you start with this ability
         ):  # learnable player ability
             upgrade_of = a.data.get("UpgradeOf")
