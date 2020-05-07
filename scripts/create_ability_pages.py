@@ -13,6 +13,13 @@ def generate_infobox(a):
     def maybe_join(xs, sep=" "):
         return sep.join(filter(None, xs))
 
+    def s_if_in(s, x, xs):
+        v = xs.get(x, "")
+        if v:
+            return s.format(v)
+        else:
+            return v
+
     s = [
         "{{Ability infobox",
         f"| name = {a.name}",
@@ -86,7 +93,7 @@ def generate_infobox(a):
             [
                 str(damage_amt),
                 a.data["DamageType"],
-                "to health" if "HealthSpecificDamage" in a.data["PvE"] else "",
+                s_if_in("to health", "HealthSpecificDamage", a.data["PvE"]),
             ]
         )
 
