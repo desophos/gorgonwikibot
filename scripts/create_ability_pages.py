@@ -1,7 +1,8 @@
 import sys
 
 import pywikibot
-from gorgonwikibot.content import Ability, get_all_content, get_name_from_iname
+from gorgonwikibot.content import (Ability, Skill, get_all_content,
+                                   get_content_by_id, get_name_from_iname)
 from gorgonwikibot.entrypoint import entrypoint
 
 
@@ -16,12 +17,18 @@ def generate_infobox(a):
         "{{Ability infobox",
         f"| name = {a.name}",
         f"| description = {a.data['Description']}",
-        f"| skill = {a.data['Skill']}",
         f"| level = {a.data['Level']}",
         f"| power cost = {a.data['PvE']['PowerCost']}",
         f"| reuse time = {a.data['ResetTime']}",
         f"| range = {a.data['PvE']['Range']} meters",
     ]
+
+    try:
+        skill = get_content_by_id(Skill, a.data["Skill"]).name
+    except KeyError:
+        skill = "Unknown"
+
+    s.append(f"| skill = {skill}")
 
     if "Keywords" in a.data:
         s.append(
