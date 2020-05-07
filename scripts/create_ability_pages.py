@@ -94,6 +94,11 @@ def generate_infobox(a):
                 str(damage_amt),
                 a.data["DamageType"],
                 s_if_in("to health", "HealthSpecificDamage", a.data["PvE"]),
+                s_if_in(
+                    "+ {} if target is Vulnerable",
+                    "ExtraDamageIfTargetVulnerable",
+                    a.data["PvE"],
+                ),
             ]
         )
 
