@@ -60,13 +60,9 @@ def generate_infobox(a):
                 special = maybe_join(
                     [
                         special,
-                        " ".join(
-                            [
-                                dot["Preface"],
-                                str(dot["DamagePerTick"]),
-                                dot["DamageType"],
-                            ]
-                        ),
+                        dot["Preface"],
+                        str(dot["DamagePerTick"]),
+                        dot["DamageType"],
                     ]
                 )
             elif dot["DamagePerTick"] > 0:
