@@ -85,8 +85,12 @@ def generate_infobox(a):
 
     damage = ""
 
+    # get whichever damage is there; only one is present
     damage_amt = a.data["PvE"].get(
-        "Damage", a.data["PvE"].get("HealthSpecificDamage", 0)
+        "Damage",
+        a.data["PvE"].get(
+            "HealthSpecificDamage", a.data["PvE"].get("ArmorSpecificDamage", 0)
+        ),
     )
     if damage_amt:
         damage = maybe_join(
@@ -94,6 +98,7 @@ def generate_infobox(a):
                 str(damage_amt),
                 a.data["DamageType"],
                 s_if_in("to health", "HealthSpecificDamage", a.data["PvE"]),
+                s_if_in("to armor", "ArmorSpecificDamage", a.data["PvE"]),
                 s_if_in(
                     "+ {} if target is Vulnerable",
                     "ExtraDamageIfTargetVulnerable",
