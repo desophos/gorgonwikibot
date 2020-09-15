@@ -54,6 +54,10 @@ class Skill(Content):
     def name(self):
         return self._name
 
+    @property
+    def iname(self):
+        return self.id
+
 
 class Ability(Content):
     datafile = "abilities"
