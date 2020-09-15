@@ -14,6 +14,6 @@ Bot scripts for the Project: Gorgon Wiki
     * You can now run scripts, e.g. `poetry run python scripts/create_quest_pages.py`
 
 ## Script arguments
-* ```--dry``` Print the page source instead of saving to the wiki
-* ```--quest "name"``` Only work for the quest with this name
-* ```--offset n``` Skip n quests from the beginning
+* `--dry` Print the page source instead of saving to the wiki
+* `--quest "name"` Only work for the quest with this name
+* `--offset n` Skip n quests from the beginning
