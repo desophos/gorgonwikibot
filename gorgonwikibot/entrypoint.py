@@ -4,8 +4,6 @@ import pywikibot
 
 
 def entrypoint(main):
-    pywikibot.config2.register_families_folder(".")
-
     parser = argparse.ArgumentParser(
         description="Entrypoint for scripts dealing with the Project: Gorgon wiki."
     )
@@ -27,6 +25,14 @@ def entrypoint(main):
     def wrapper(argv):
         local_args = pywikibot.handle_args(argv[1:])
         options = parser.parse_args(local_args)
+
+        site = pywikibot.Site()
+        site.login()
+        user = site.user()
+        if user:
+            pywikibot.output(f"Logged in on {site} as {user}.")
+        else:
+            pywikibot.output(f"Not logged in on {site}.")
 
         if options.dry:
             pywikibot.output("Dry-run mode, not creating pages...\n")

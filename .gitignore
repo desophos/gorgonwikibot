@@ -5,7 +5,7 @@
 *.sublime-*
 *.ctrl
 *.lwp
-user-*.py
+user-password.py
 logs/
 
 # Byte-compiled / optimized / DLL files
