@@ -22,7 +22,14 @@ def is_valid_enemy_ability(a):
         is_enemy(a.iname)
         and "AttributesThatDeltaPowerCost" not in a.data  # no player abilities
         and a.data["Description"]  # we only care about abilities with tooltips
-    )
+    ) or a.iname in [
+        "PetUndeadArrow1",
+        # "PetUndeadArrow2",  # no description
+        "PetUndeadOmegaArrow",
+        "MinigolemBombToss4",
+        "MinigolemPunch4",
+        "MinigolemRageAcidToss4",
+    ]  # special cases for SkeletonDistanceArcher and SecurityGolem
 
 
 def get_abilities(validator, include=[]):
@@ -65,16 +72,8 @@ def generate_ai_profiles():
     : {{Combat Ability Rage|KrakenRage}}
     <noinclude>[[Category:AI Profile]]</noinclude>
     """
-    include = [
-        "PetUndeadArrow1",
-        # "PetUndeadArrow2",  # no description
-        "PetUndeadOmegaArrow",
-        "MinigolemBombToss4",
-        "MinigolemPunch4",
-        "MinigolemRageAcidToss4",
-    ]  # special cases for SkeletonDistanceArcher and SecurityGolem
 
-    abilities = get_abilities(is_valid_enemy_ability, include)
+    abilities = get_abilities(is_valid_enemy_ability)
     ais = get_ais(is_enemy)
     profiles = {}
 
