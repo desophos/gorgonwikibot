@@ -19,7 +19,7 @@ def is_enemy(name):
 
 def is_valid_enemy_ability(a):
     return (
-        is_enemy(a.name)
+        is_enemy(a.iname)
         and "AttributesThatDeltaPowerCost" not in a.data  # no player abilities
         and a.data["Description"]  # we only care about abilities with tooltips
     )
