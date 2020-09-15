@@ -8,7 +8,7 @@ from scripts.create_ai_profiles import (get_abilities, get_ais, is_enemy,
 
 
 def dummy_ability(custom={}):
-    data = {"Name": "_", "Description": "_"}
+    data = {"Name": "_", "InternalName": "_", "Description": "_"}
     data.update(custom)
     return Ability("_", data)
 
