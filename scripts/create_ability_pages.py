@@ -39,7 +39,7 @@ def generate_infobox(a):
 
     if "Keywords" in a.data:
         s.append(
-            "| keywords = " + " ".join("{{KWAB|%s}}" % s for s in a.data["Keywords"])
+            "| keywords = " + "".join("{{KWAB|%s}}" % s for s in a.data["Keywords"])
         )
 
     if "RageMultiplier" in a.data["PvE"]:
