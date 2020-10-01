@@ -259,7 +259,7 @@ def main(options):
     for title, text in generate_pages().items():
         page = pywikibot.Page(site, title)
         if page.text == text:
-            pywikibot.output(f"No changes to {title}\n")
+            pywikibot.output(f"No changes to {title}")
             continue
         page.text = text
         if options.dry:
