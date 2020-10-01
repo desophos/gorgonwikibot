@@ -1,16 +1,10 @@
 from operator import not_, truth
 
 import pytest
-from gorgonwikibot.content import Ability
 from scripts.create_ai_profiles import (get_abilities, get_ais, is_enemy,
                                         is_player_minigolem, is_scaled,
                                         is_valid_enemy_ability)
-
-
-def dummy_ability(custom={}):
-    data = {"Name": "_", "InternalName": "_", "Description": "_"}
-    data.update(custom)
-    return Ability("_", data)
+from tests import dummy_ability
 
 
 @pytest.mark.parametrize(
