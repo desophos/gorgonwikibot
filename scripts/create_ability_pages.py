@@ -1,9 +1,56 @@
+import re
 import sys
+from operator import attrgetter
 
 import pywikibot
 from gorgonwikibot.content import (Ability, Skill, get_all_content,
-                                   get_content_by_id, get_name_from_iname)
+                                   get_content_by_id, get_content_by_iname,
+                                   get_name_from_iname)
 from gorgonwikibot.entrypoint import entrypoint
+
+# Front Kick is in Unarmed and Cow
+duplicates = ["Front Kick"]  # disambiguation between skills
+disambiguate = {
+    name: f"{name} (ability)"
+    for name in ["First Aid", "Rabbit's Foot", "Lycanspore Bomb"]
+}  # disambiguation from another page with same name
+
+
+def is_learnable(a):
+    keywords = a.data.get("Keywords")
+    return "Lint_NotLearnable" not in keywords if keywords else True
+
+
+def ability_chains():
+    # assume no base ability has a number in its name
+    # can't use just letters because of apostrophes & colons
+    # Call Stabled Pet has "#"
+    regex = re.compile(r"(?: ?[^\d\s#]+)+")
+    chains = {}
+    for a in get_all_content(Ability):
+        if (
+            (
+                a.data.get("AttributesThatDeltaPowerCost")
+                or a.data.get("AttributesThatModPowerCost")
+            )
+            and is_learnable(a)
+            and a.iname != "FaeBombSporeTrigger"  # not a learnable ability
+            and a.iname != "CharmRat"  # this page has descriptive info
+            or a.iname in ["Punch", "SwordSlash"]  # you start with these abilities
+        ):  # learnable player ability
+            basename = re.search(regex, a.name)[0]
+            basename = disambiguate.get(basename, basename)
+            if basename in duplicates:
+                basename += f" ({a.data['Skill']})"
+            try:
+                chains[basename].append(a)
+            except KeyError:
+                chains[basename] = [a]
+
+    # we can use alphabetical sorting as long as
+    # ability upgrades are just called "Base Name 2" etc.
+    # this also groups variants together, e.g. Claw Barrage
+    return {k: sorted(v, key=attrgetter("name")) for k, v in chains.items()}
 
 
 def generate_infobox(a):
@@ -121,36 +168,71 @@ def generate_infobox(a):
     return "\n".join(s)
 
 
-def generate_page(a):
+def generate_infoboxes(chain):
+    if len(chain) == 1:
+        return generate_infobox(chain[0])
+    else:
+        return "\n".join(
+            [
+                "{| width=100%",
+                "\n".join("\n".join(["|-", "|", generate_infobox(a)]) for a in chain),
+                "|}",
+            ]
+        )
+
+
+def generate_page(chain):
     return "\n".join(
         [
             "__NOTOC__",
-            generate_infobox(a),
+            generate_infoboxes(chain),
             "<noinclude>[[Category:Abilities]]</noinclude>",
         ]
     )
 
 
 def generate_pages():
-    def is_learnable(a):
-        keywords = a.data.get("Keywords")
-        return "Lint_NotLearnable" not in keywords if keywords else True
-
     pages = {}
+    disambiguation = {
+        "First Aid (ability)": "You may be looking for the Skill '''[[First Aid]]'''.",
+    }
+    disambiguation.update(
+        (name, f"You may be looking for the creature '''[[{name} (mob)|{name}]]'''.")
+        for name in ["Cold Sphere", "Acid Sigil", "Electricity Sigil"]
+    )
 
-    for a in get_all_content(Ability):
-        if (
-            a.data.get("AttributesThatDeltaPowerCost")
-            and is_learnable(a)
-            or a.iname == "Punch"  # you start with this ability
-        ):  # learnable player ability
-            upgrade_of = a.data.get("UpgradeOf")
-            if upgrade_of:
-                text = f"#redirect [[{get_name_from_iname(Ability, upgrade_of)}]]"
-            else:
-                text = generate_page(a)
+    def add_disambiguation_box(title):
+        return "\n".join(
+            [
+                "{{ambox",
+                f"| type = {disambiguation[title]}",
+                "| border = yellow",
+                "}}",
+                pages[title],
+            ]
+        )
 
-            pages[a.name] = text
+    for basename, chain in ability_chains().items():
+        pages[basename] = generate_page(chain)
+        for a in chain:
+            # redirect duplicates to disambiguation page
+            # for duplicates, firstname should equal pre-modification basename
+            firstname = chain[0].name
+            realbasename = firstname if firstname in duplicates else basename
+            # create redirect pages for any non-basename abilities
+            # this includes those where the basename ability doesn't exist:
+            # Flare Fireball and Raise Skeletal Ratkin Mage
+            if (
+                disambiguate.get(a.name, a.name) != realbasename
+            ):  # already created base page
+                pages[a.name] = f"#redirect [[{realbasename}]]"
+
+    for title in disambiguation:
+        pages[title] = add_disambiguation_box(title)
+
+    # sanitize page titles
+    # looking at you Call Stabled Pet #1-6
+    pages = {title.replace("#", ""): page for title, page in pages.items()}
 
     return pages
 
@@ -188,3 +270,42 @@ def main(options):
 
 if __name__ == "__main__":
     main(sys.argv)
+
+
+"""potentially useful functions that ended up being unnecessary
+
+def count_prereqs(a):
+    req = a.data.get("Prerequisite")
+    if not req:
+        return 0
+    else:
+        return 1 + count_prereqs(get_content_by_iname(Ability, req))
+
+def prereq_sort(a, b):
+    # sanity checks
+    assert a.iname != b.iname, f"{a.iname} and {b.iname} are the same ability!"
+    assert a.data.get("UpgradeOf") == b.data.get(
+        "UpgradeOf"
+    ), f"{a.iname} and {b.iname} aren't UpgradeOf the same ability!"
+
+    areq = a.data.get("Prerequisite")
+    breq = b.data.get("Prerequisite")
+
+    # one is a base ability
+    if not areq:
+        return a
+    elif not breq:
+        return b
+    # one has the other as Prerequisite
+    elif breq == a.iname:
+        return a
+    elif areq == b.iname:
+        return b
+    # one has more prerequisites than the other
+    elif count_prereqs(b) > count_prereqs(a):
+        return a
+    elif count_prereqs(a) > count_prereqs(b):
+        return b
+    else:
+        raise NotImplementedError(f"unable to sort {a.iname} vs. {b.iname}")
+"""
