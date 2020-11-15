@@ -7,7 +7,7 @@ from gorgonwikibot.quest import Quest
 
 
 @entrypoint
-def main(options):
+def main(site, options):
     # Get quest list
     if options.quest:
         quests = [get_content_by_match(Quest, "Name", options.quest)]
@@ -15,9 +15,6 @@ def main(options):
         quests = get_all_content(Quest)
 
     quest_blacklist = ["KillSkeletons", "VisitGravestones"]
-
-    # Connect to API
-    site = pywikibot.Site()
     offset = options.offset
 
     for quest in quests[offset:]:
@@ -63,7 +60,7 @@ def main(options):
         if options.dry:
             pywikibot.output(page.text + "\n\n")
         else:
-            page.save(summary="Create quest page")
+            page.save(summary=options.msg or "Create quest page")
             pywikibot.output(f"Page saved for quest {quest.name}")
 
 

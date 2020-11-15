@@ -12,6 +12,7 @@ def entrypoint(main):
         action="store_true",
         help="dry-run mode prints page source instead of modifying the wiki",
     )
+    parser.add_argument("--msg", help="custom edit message for the wiki")
     parser.add_argument(
         "--quest", help='run the script only for a specific quest (by "Name")'
     )
@@ -37,6 +38,6 @@ def entrypoint(main):
         if options.dry:
             pywikibot.output("Dry-run mode, not creating pages...\n")
 
-        main(options)
+        main(site, options)
 
     return wrapper

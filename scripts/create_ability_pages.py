@@ -254,8 +254,7 @@ def generate_pages():
 
 
 @entrypoint
-def main(options):
-    site = pywikibot.Site()
+def main(site, options):
     for title, text in generate_pages().items():
         page = pywikibot.Page(site, title)
         if page.text == text:
@@ -265,7 +264,7 @@ def main(options):
         if options.dry:
             pywikibot.output(f"{title}\n{page.text}\n")
         else:
-            page.save(summary="Create ability page")
+            page.save(summary=options.msg or "Create ability page")
 
 
 if __name__ == "__main__":

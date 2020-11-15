@@ -99,8 +99,7 @@ def generate_ai_profiles():
 
 
 @entrypoint
-def main(options):
-    site = pywikibot.Site()
+def main(site, options):
     for name, profile in generate_ai_profiles().items():
         title = f"AIP:{name}"
         page = pywikibot.Page(site, title)
@@ -111,7 +110,7 @@ def main(options):
         if options.dry:
             pywikibot.output(f"{title}\n{page.text}\n")
         else:
-            page.save(summary="Create AI Profile page")
+            page.save(summary=options.msg or "Create AI Profile page")
 
 
 if __name__ == "__main__":
