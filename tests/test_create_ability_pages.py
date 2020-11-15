@@ -49,13 +49,16 @@ def test_ability_chains():
         )
 
 
+@pytest.mark.xfail
 def test_generate_infobox():
     raise NotImplementedError
 
 
+@pytest.mark.xfail
 def test_generate_infoboxes():
     raise NotImplementedError
 
 
+@pytest.mark.xfail
 def test_generate_page():
     raise NotImplementedError
