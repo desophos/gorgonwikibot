@@ -10,6 +10,8 @@ python = "^3.8"
 requests = "^2.22.0"
 pywikibot = "^3.0.20200111"
 pytest = "^5.4.1"
+coverage = "^5.3"
+pytest-profiling = "^1.7.0"
 
 [tool.poetry.dev-dependencies]
 
