@@ -8,6 +8,10 @@
 user-password.py
 logs/
 
+# Profiler artifacts
+profile
+prof/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 apicache*/
