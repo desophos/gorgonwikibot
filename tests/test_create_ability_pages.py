@@ -59,7 +59,3 @@ def test_generate_infoboxes():
 
 def test_generate_page():
     raise NotImplementedError
-
-
-def test_generate_pages():
-    raise NotImplementedError
