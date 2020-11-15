@@ -2,7 +2,8 @@ from functools import reduce
 from operator import not_, truth
 
 import pytest
-from scripts.create_ability_pages import *
+from scripts.create_ability_pages import (ability_chains, disambiguate,
+                                          is_learnable)
 
 
 @pytest.mark.parametrize(
