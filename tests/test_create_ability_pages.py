@@ -3,7 +3,6 @@ from operator import not_, truth
 
 import pytest
 from scripts.create_ability_pages import *
-from tests import dummy_ability
 
 
 @pytest.mark.parametrize(
@@ -15,7 +14,7 @@ from tests import dummy_ability
         (truth, {}),
     ],
 )
-def test_is_learnable(btest, data):
+def test_is_learnable(dummy_ability, btest, data):
     assert btest(is_learnable(dummy_ability(data)))
 
 

@@ -4,7 +4,6 @@ import pytest
 from scripts.create_ai_profiles import (get_abilities, get_ais, is_enemy,
                                         is_player_minigolem, is_scaled,
                                         is_valid_enemy_ability)
-from tests import dummy_ability
 
 
 @pytest.mark.parametrize(
@@ -31,7 +30,7 @@ def test_is_enemy(btest, data):
     "btest,data",
     [(not_, {"AttributesThatDeltaPowerCost": []}), (not_, {"Description": ""})],
 )
-def test_is_valid_enemy_ability(btest, data):
+def test_is_valid_enemy_ability(dummy_ability, btest, data):
     assert btest(is_valid_enemy_ability(dummy_ability(data)))
 
 
