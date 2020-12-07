@@ -105,6 +105,41 @@ def generate_ai_profiles():
     return profiles
 
 
+def generate_pet_profiles():
+    """
+    {|
+    |-
+    |rowspan="3"|{{Combat Ability icon|BearBite}}
+    |'''Bear Claw (Pet)'''
+    |-
+    |Slashing Damage
+    |-
+    |Base Damage: X
+    |}"""
+    abilities = get_abilities(lambda s: "(Pet)" in s)
+    ais = get_ais(lambda s: "_Pet" in s)
+    profiles = {}
+
+    for ai, alist in ais.items():
+        # ignore abilities that have already been filtered out
+        # and get Ability instances from the ai ability list
+        alist = list(map(get_content_by_iname, filter(lambda a: a in abilities, alist)))
+        if alist:  # ai has at least one valid ability
+            profile = ""
+            for a in alist:
+                profile += "\n".join(
+                    "{|",
+                    "|-",
+                    '|rowspan="3"|{{Combat Ability icon|%s}}' % a.iname,
+                    "'''%s'''" % a.name,
+                    "|-",
+                    "|%s" % a.data["Description"],
+                    "|-",
+                    "|Base Damage: %i" % a.data["PvE"]["Damage"],
+                    "|}",
+                )
+
+
 @entrypoint
 def main(site, options):
     for name, profile in generate_ai_profiles().items():
