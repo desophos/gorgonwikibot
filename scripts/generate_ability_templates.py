@@ -1,6 +1,6 @@
 import sys
 
-from scripts.create_ai_profiles import get_abilities, is_valid_enemy_ability
+from scripts.create_ai_profiles import get_abilities, is_valid_ability
 
 
 def write_template(abilities, key, filename):
@@ -9,6 +9,6 @@ def write_template(abilities, key, filename):
 
 
 if __name__ == "__main__":
-    abilities = get_abilities(is_valid_enemy_ability).items()
+    abilities = get_abilities(is_valid_ability).items()
     write_template(abilities, "Description", "abilities.txt")
     write_template(abilities, "IconID", "icons.txt")

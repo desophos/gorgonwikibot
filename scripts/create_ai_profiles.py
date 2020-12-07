@@ -1,5 +1,6 @@
 import re
 import sys
+from functools import partial
 
 import pywikibot
 from gorgonwikibot import cdn
@@ -12,17 +13,12 @@ def is_player_minigolem(name):
     return "Minigolem" in name and "Enemy" not in name
 
 
+def is_pet(name):
+    return "Pet" in name
+
+
 def is_enemy(name):
-    # no player pets or minigolems
-    return not ("Pet" in name or is_player_minigolem(name))
-
-
-def is_valid_enemy_ability(a):
-    return (
-        is_enemy(a.iname)
-        and "AttributesThatDeltaPowerCost" not in a.data  # no player abilities
-        and a.data["Description"]  # we only care about abilities with tooltips
-    ) or a.iname in [
+    include = [
         "PetUndeadArrow1",
         # "PetUndeadArrow2",  # no description
         "PetUndeadOmegaArrow",
@@ -31,8 +27,19 @@ def is_valid_enemy_ability(a):
         "MinigolemRageAcidToss4",
     ]  # special cases for SkeletonDistanceArcher and SecurityGolem
 
+    # no player pets or minigolems
+    return name in include or not (is_pet(name) or is_player_minigolem(name))
 
-def get_abilities(validator, include=[]):
+
+def is_valid_ability(a, validator=lambda _: True):
+    return (
+        validator(a.iname)
+        and "AttributesThatDeltaPowerCost" not in a.data  # no player abilities
+        and a.data["Description"]  # we only care about abilities with tooltips
+    )
+
+
+def get_abilities(validator=lambda _: True, include=[]):
     return {
         a.iname: {
             "Description": a.data["Description"],
@@ -53,7 +60,7 @@ def is_scaled(name, params):
     )
 
 
-def get_ais(validator):
+def get_ais(validator=lambda _: True):
     return {
         name: [
             ability
@@ -73,7 +80,7 @@ def generate_ai_profiles():
     <noinclude>[[Category:AI Profile]]</noinclude>
     """
 
-    abilities = get_abilities(is_valid_enemy_ability)
+    abilities = get_abilities(partial(is_valid_ability, validator=is_enemy))
     ais = get_ais(is_enemy)
     profiles = {}
 

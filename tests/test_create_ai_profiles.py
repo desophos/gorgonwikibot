@@ -3,7 +3,7 @@ from operator import not_, truth
 import pytest
 from scripts.create_ai_profiles import (get_abilities, get_ais, is_enemy,
                                         is_player_minigolem, is_scaled,
-                                        is_valid_enemy_ability)
+                                        is_valid_ability)
 
 
 @pytest.mark.parametrize(
@@ -30,8 +30,8 @@ def test_is_enemy(btest, data):
     "btest,data",
     [(not_, {"AttributesThatDeltaPowerCost": []}), (not_, {"Description": ""})],
 )
-def test_is_valid_enemy_ability(dummy_ability, btest, data):
-    assert btest(is_valid_enemy_ability(dummy_ability(data)))
+def test_is_valid_ability(dummy_ability, btest, data):
+    assert btest(is_valid_ability(dummy_ability(data)))
 
 
 @pytest.mark.parametrize(
@@ -50,7 +50,7 @@ def test_is_scaled(btest, name, data):
 
 
 def test_get_abilities():
-    abilities = get_abilities(is_valid_enemy_ability)
+    abilities = get_abilities(is_valid_ability)
     assert abilities
 
 
