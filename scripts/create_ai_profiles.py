@@ -4,39 +4,9 @@ from functools import partial
 
 import pywikibot
 from gorgonwikibot import cdn
-from gorgonwikibot.content import (Ability, get_all_content,
+from gorgonwikibot.content import (Ability, Ai, get_all_content,
                                    get_content_by_iname)
 from gorgonwikibot.entrypoint import entrypoint
-
-
-def is_player_minigolem(name):
-    return "Minigolem" in name and "Enemy" not in name
-
-
-def is_pet(name):
-    return "Pet" in name
-
-
-def is_enemy(name):
-    include = [
-        "PetUndeadArrow1",
-        # "PetUndeadArrow2",  # no description
-        "PetUndeadOmegaArrow",
-        "MinigolemBombToss4",
-        "MinigolemPunch4",
-        "MinigolemRageAcidToss4",
-    ]  # special cases for SkeletonDistanceArcher and SecurityGolem
-
-    # no player pets or minigolems
-    return name in include or not (is_pet(name) or is_player_minigolem(name))
-
-
-def is_valid_ability(a, validator=lambda _: True):
-    return (
-        validator(a.iname)
-        and "AttributesThatDeltaPowerCost" not in a.data  # no player abilities
-        and a.data["Description"]  # we only care about abilities with tooltips
-    )
 
 
 def get_abilities(validator=lambda _: True, include=[]):
@@ -51,25 +21,8 @@ def get_abilities(validator=lambda _: True, include=[]):
     }
 
 
-def is_scaled(name, params):
-    # some abilities have duplicates scaled to higher levels
-    return (
-        "minLevel" in params
-        and params["minLevel"] > 1  # SnailRage and SpiderKill
-        and re.search(r"[B-Z2-9]$", name)
-    )
-
-
 def get_ais(validator=lambda _: True):
-    return {
-        name: [
-            ability
-            for ability, params in v["Abilities"].items()
-            if not is_scaled(ability, params)
-        ]
-        for name, v in cdn.get_file("ai").items()
-        if validator(name)
-    }
+    return {ai.name: ai.abilities for ai in get_all_content(Ai) if validator(ai)}
 
 
 def generate_ai_profiles():
@@ -80,8 +33,8 @@ def generate_ai_profiles():
     <noinclude>[[Category:AI Profile]]</noinclude>
     """
 
-    abilities = get_abilities(partial(is_valid_ability, validator=is_enemy))
-    ais = get_ais(is_enemy)
+    abilities = get_abilities(lambda a: a.is_enemy and a.data["Description"])
+    ais = get_ais(lambda ai: ai.is_enemy)
     profiles = {}
 
     for ai, alist in ais.items():
@@ -116,8 +69,8 @@ def generate_pet_profiles():
     |-
     |Base Damage: X
     |}"""
-    abilities = get_abilities(lambda s: "(Pet)" in s)
-    ais = get_ais(lambda s: "_Pet" in s)
+    abilities = get_abilities(lambda a: a.is_pet)
+    ais = get_ais(lambda ai: ai.is_pet)
     profiles = {}
 
     for ai, alist in ais.items():

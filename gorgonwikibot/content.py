@@ -73,6 +73,82 @@ class Ability(Content):
         else:
             return f"[[{self.name}]]"
 
+    @property
+    def is_player(self):
+        return any(
+            s in self.data
+            for s in ("AttributesThatDeltaPowerCost", "AttributesThatModPowerCost")
+        )
+
+    @property
+    def is_pet(self):
+        return (
+            "Pet" in self.iname
+            and not self.is_player
+            and self.iname
+            not in ("PetUndeadArrow1", "PetUndeadArrow2", "PetUndeadOmegaArrow")
+        )  # SkeletonDistanceArcher
+
+    @property
+    def is_player_minigolem(self):
+        return (
+            "Minigolem" in self.iname
+            and "Enemy" not in self.iname
+            and self.iname
+            not in (
+                "MinigolemBombToss4",
+                "MinigolemPunch4",
+                "MinigolemRageAcidToss4",
+            )  # SecurityGolem
+        )
+
+    @property
+    def is_enemy(self):
+        return not any(self.is_player, self.is_pet, self.is_player_minigolem)
+
+
+class Ai(Content):
+    datafile = "ai"
+
+    def __init__(self, id, data):
+        super().__init__(id, data)
+
+    @property
+    def name(self):
+        return self.id
+
+    @property
+    def iname(self):
+        return self.id
+
+    @property
+    def is_pet(self):
+        return "_Pet" in self.iname
+
+    @property
+    def is_player_minigolem(self):
+        return "Minigolem" in self.iname and "Enemy" not in self.iname
+
+    @property
+    def is_enemy(self):
+        return not any(self.is_pet, self.is_player_minigolem)
+
+    @property
+    def abilities(self, include_scaled=False):
+        def is_scaled(name, params):
+            # some abilities have duplicates scaled to higher levels
+            return (
+                "minLevel" in params
+                and params["minLevel"] > 1  # SnailRage and SpiderKill
+                and re.search(r"[B-Z2-9]$", name)
+            )
+
+        return [
+            name
+            for name, params in self.data["Abilities"].items()
+            if include_scaled or not is_scaled(name, params)
+        ]
+
 
 class Npc(Content):
     datafile = "npcs"
