@@ -60,10 +60,14 @@ def generate_ai_profiles():
 
 def generate_pet_profiles():
     def template_and_damage(a, new_cell=True):
-
-    def template_and_damage(a):
         dmg = a.data["PvE"].get("Damage")
-        return "{{Combat Ability|%s}}" % a.iname + (f"({dmg} damage)" if dmg else "")
+        return "".join(
+            [
+                "{{Combat Ability|%s}}" % a.iname,
+                " || " if dmg and new_cell else "",
+                f"({dmg} damage)" if dmg else "",
+            ]
+        )
 
     abilities = get_abilities(lambda a: a.is_pet)
     ais = get_ais(lambda ai: ai.is_pet)
@@ -114,7 +118,10 @@ def generate_pet_profiles():
                 )
 
             basic_text = ", ".join(
-                [template_and_damage(a) for a in cmds[Ability.PetCommands.BASIC]]
+                [
+                    template_and_damage(a, new_cell=False)
+                    for a in cmds[Ability.PetCommands.BASIC]
+                ]
             )
 
             profiles[ai.name] = "\n".join(
