@@ -133,7 +133,6 @@ class Ai(Content):
     def is_enemy(self):
         return not any(self.is_pet, self.is_player_minigolem)
 
-    @property
     def abilities(self, include_scaled=False):
         def is_scaled(name, params):
             # some abilities have duplicates scaled to higher levels
