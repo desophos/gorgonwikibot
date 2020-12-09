@@ -60,7 +60,10 @@ class Skill(Content):
 
 
 class Ability(Content):
+    from enum import Enum
+
     datafile = "abilities"
+    PetCommands = Enum("Command", "BASIC SIC TRICK")
 
     def __init__(self, id, data):
         super().__init__(id, data)
@@ -88,6 +91,18 @@ class Ability(Content):
             and self.iname
             not in ("PetUndeadArrow1", "PetUndeadArrow2", "PetUndeadOmegaArrow")
         )  # SkeletonDistanceArcher
+
+    @property
+    def which_pet_command(self):
+        kw = self.data["Keywords"]
+        if "PetBasicAttack" in kw:
+            return Ability.PetCommands.BASIC
+        elif "PetA" in kw:
+            return Ability.PetCommands.SIC
+        elif "PetB" in kw:
+            return Ability.PetCommands.TRICK
+        else:
+            return None
 
     @property
     def is_player_minigolem(self):
