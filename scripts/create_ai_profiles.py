@@ -69,28 +69,78 @@ def generate_pet_profiles():
     |-
     |Base Damage: X
     |}"""
+
+    def template_and_damage(a):
+        dmg = a.data["PvE"].get("Damage")
+        return "{{Combat Ability|%s}}" % a.iname + (f"({dmg} damage)" if dmg else "")
+
     abilities = get_abilities(lambda a: a.is_pet)
     ais = get_ais(lambda ai: ai.is_pet)
     profiles = {}
 
-    for ai, alist in ais.items():
+    for ai in ais:
         # ignore abilities that have already been filtered out
         # and get Ability instances from the ai ability list
-        alist = list(map(get_content_by_iname, filter(lambda a: a in abilities, alist)))
+        alist = [
+            get_content_by_iname(Ability, a)
+            for a in ai.abilities(include_scaled=True)
+            if a in abilities
+        ]
         if alist:  # ai has at least one valid ability
-            profile = ""
+            cmds = {cmd: [] for cmd in Ability.PetCommands}
             for a in alist:
-                profile += "\n".join(
-                    "{|",
-                    "|-",
-                    '|rowspan="3"|{{Combat Ability icon|%s}}' % a.iname,
-                    "'''%s'''" % a.name,
-                    "|-",
-                    "|%s" % a.data["Description"],
-                    "|-",
-                    "|Base Damage: %i" % a.data["PvE"]["Damage"],
-                    "|}",
+                try:
+                    cmds[a.which_pet_command].append(a)
+                except KeyError:
+                    pywikibot.warning(
+                        f"WARNING: Skipped ability {a.name} for AI {ai.name} because it is not a pet command\n"
+                    )
+
+            def level_table(cmd):
+                rows = []
+
+                for a in cmds[cmd]:
+                    ai_ability_data = ai.data["Abilities"][a.iname]
+                    min = ai_ability_data.get("minLevel", 1)
+                    max = ai_ability_data.get("maxLevel")
+
+                    rows.append(
+                        "".join(
+                            [
+                                f"| Level {min}",
+                                f"-{max}" if max else "+",
+                                f": || {template_and_damage(a)}",
+                            ]
+                        )
+                    )
+
+                return "\n".join(
+                    [
+                        '{| class="mw-collapsible mw-collapsed"',
+                        "\n|-\n".join(rows),
+                        "|}",
+                    ]
                 )
+
+            basic_text = ", ".join(
+                [template_and_damage(a) for a in cmds[Ability.PetCommands.BASIC]]
+            )
+
+            profiles[ai.name] = "\n".join(
+                [
+                    '{| class="wikitable"',
+                    f"| Basic Attack: || {basic_text}",
+                    "|-",
+                    "| Sic 'Em Attack: || ",
+                    level_table(Ability.PetCommands.SIC),
+                    "|-",
+                    "| Special Trick: || ",
+                    level_table(Ability.PetCommands.TRICK),
+                    "|}",
+                ]
+            )
+
+    return profiles
 
 
 @entrypoint
