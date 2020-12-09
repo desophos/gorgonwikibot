@@ -22,7 +22,7 @@ def get_abilities(validator=lambda _: True, include=[]):
 
 
 def get_ais(validator=lambda _: True):
-    return {ai.name: ai.abilities for ai in get_all_content(Ai) if validator(ai)}
+    return filter(validator, get_all_content(Ai))
 
 
 def generate_ai_profiles():
@@ -37,9 +37,9 @@ def generate_ai_profiles():
     ais = get_ais(lambda ai: ai.is_enemy)
     profiles = {}
 
-    for ai, alist in ais.items():
+    for ai in ais:
         # ignore abilities that have already been filtered out
-        alist = list(filter(lambda a: a in abilities, alist))
+        alist = list(filter(lambda a: a in abilities, ai.abilities()))
         if alist:  # ai has at least one valid ability
             profile = ""
             rages, nonrages = [], []
@@ -54,7 +54,7 @@ def generate_ai_profiles():
             for a in rages:
                 profile += ": {{Combat Ability Rage|%s}}\n" % a
             profile += "<noinclude>[[Category:AI Profile]]</noinclude>"
-            profiles[ai] = profile
+            profiles[ai.name] = profile
     return profiles
 
 
