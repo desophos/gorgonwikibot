@@ -59,16 +59,7 @@ def generate_ai_profiles():
 
 
 def generate_pet_profiles():
-    """
-    {|
-    |-
-    |rowspan="3"|{{Combat Ability icon|BearBite}}
-    |'''Bear Claw (Pet)'''
-    |-
-    |Slashing Damage
-    |-
-    |Base Damage: X
-    |}"""
+    def template_and_damage(a, new_cell=True):
 
     def template_and_damage(a):
         dmg = a.data["PvE"].get("Damage")
