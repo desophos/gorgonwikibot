@@ -116,6 +116,9 @@ def generate_pet_profiles():
                         )
                     )
 
+                # css for toggle link
+                rows[0] += ' || style="width:100%; text-align:right;" |'
+
                 return "\n".join(
                     [
                         '{| class="mw-collapsible mw-collapsed"',
@@ -130,7 +133,7 @@ def generate_pet_profiles():
 
             profiles[ai.name] = "\n".join(
                 [
-                    '{| class="wikitable"',
+                    '{| class="wikitable extimage32px" style="white-space:nowrap;"',
                     f"| Basic Attack: || {basic_text}",
                     "|-",
                     "| Sic 'Em Attack: || ",
