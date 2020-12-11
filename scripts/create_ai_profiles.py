@@ -1,9 +1,6 @@
-import re
 import sys
-from functools import partial
 
 import pywikibot
-from gorgonwikibot import cdn
 from gorgonwikibot.content import (Ability, Ai, get_all_content,
                                    get_content_by_iname)
 from gorgonwikibot.entrypoint import entrypoint
