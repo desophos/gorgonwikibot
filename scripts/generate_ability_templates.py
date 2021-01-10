@@ -10,5 +10,5 @@ def write_template(abilities, key, filename):
 
 if __name__ == "__main__":
     abilities = get_abilities(is_valid_ability).items()
-    write_template(abilities, "Description", "abilities.txt")
-    write_template(abilities, "IconID", "icons.txt")
+    write_template(abilities, "Description", "logs/abilities.txt")
+    write_template(abilities, "IconID", "logs/icons.txt")
