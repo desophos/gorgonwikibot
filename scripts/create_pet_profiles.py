@@ -90,6 +90,7 @@ def generate_pet_profiles():
                     "| Special Trick: || ",
                     level_table(Ability.PetCommands.TRICK),
                     "|}",
+                    "<noinclude>[[Category:Pet Profile]]</noinclude>",
                 ]
             )
 
@@ -99,7 +100,7 @@ def generate_pet_profiles():
 @entrypoint
 def main(site, options):
     for name, profile in generate_pet_profiles().items():
-        title = f"???:{name}"
+        title = f"AIP:{name}"
         page = pywikibot.Page(site, title)
         if page.text == profile:
             pywikibot.output(f"No changes to {title}\n")
