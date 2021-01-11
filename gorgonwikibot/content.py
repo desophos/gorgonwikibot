@@ -119,7 +119,7 @@ class Ability(Content):
 
     @property
     def is_enemy(self):
-        return not any(self.is_player, self.is_pet, self.is_player_minigolem)
+        return not any([self.is_player, self.is_pet, self.is_player_minigolem])
 
 
 class Ai(Content):
@@ -146,7 +146,7 @@ class Ai(Content):
 
     @property
     def is_enemy(self):
-        return not any(self.is_pet, self.is_player_minigolem)
+        return not any([self.is_pet, self.is_player_minigolem])
 
     def abilities(self, include_scaled=False):
         def is_scaled(name, params):
