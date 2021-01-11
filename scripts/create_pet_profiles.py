@@ -42,7 +42,7 @@ def generate_pet_profiles():
                 try:
                     cmds[a.which_pet_command].append(a)
                 except KeyError:
-                    pywikibot.warning(
+                    pywikibot.output(
                         f"WARNING: Skipped ability {a.name} for AI {ai.name} because it is not a pet command\n"
                     )
 
