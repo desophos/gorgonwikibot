@@ -102,7 +102,7 @@ class Ability(Content):
         elif "PetB" in kw:
             return Ability.PetCommands.TRICK
         else:
-            return None
+            raise ValueError(f"{self.name} is not a pet command")
 
     @property
     def is_player_minigolem(self):
