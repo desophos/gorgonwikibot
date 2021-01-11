@@ -24,9 +24,15 @@ def generate_pet_profiles():
             ]
         )
 
-    abilities = get_abilities(lambda a: a.is_pet)
+    abilities = get_abilities(lambda a: a.is_pet, ["GrimalkinBite", "GrimalkinClaw"])
     ais = get_ais(lambda ai: ai.is_pet)
     profiles = {}
+
+    # Grimalkin_Pet and Grimalkin_PetHissy use these for their basic attack.
+    # they are the only pets that use non-pet abilities.
+    # just monkey-patch these because they're a special case.
+    for name in ["GrimalkinBite", "GrimalkinClaw"]:
+        abilities[name]["Keywords"].append("PetBasicAttack")
 
     for ai in ais:
         # ignore abilities that have already been filtered out
