@@ -30,7 +30,9 @@ def generate_ai_profiles():
     <noinclude>[[Category:AI Profile]]</noinclude>
     """
 
-    abilities = get_abilities(lambda a: a.is_enemy and a.data["Description"])
+    abilities = get_abilities(
+        lambda a: (a.is_enemy or a.is_pet) and a.data["Description"]
+    )
     ais = get_ais(lambda ai: ai.is_enemy)
     profiles = {}
 
