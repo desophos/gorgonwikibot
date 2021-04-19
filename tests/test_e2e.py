@@ -8,6 +8,7 @@ def site():
     return pywikibot.Site()
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "fn,title_template",
     [
