@@ -94,15 +94,15 @@ class Ability(Content):
 
     @property
     def which_pet_command(self):
-        kw = self.data["Keywords"]
-        if "PetBasicAttack" in kw:
-            return Ability.PetCommands.BASIC
-        elif "PetA" in kw:
-            return Ability.PetCommands.SIC
-        elif "PetB" in kw:
-            return Ability.PetCommands.TRICK
-        else:
-            raise ValueError(f"{self.name} is not a pet command")
+        kw = self.data.get("Keywords")
+        if kw:
+            if "PetBasicAttack" in kw:
+                return Ability.PetCommands.BASIC
+            elif "PetA" in kw:
+                return Ability.PetCommands.SIC
+            elif "PetB" in kw:
+                return Ability.PetCommands.TRICK
+        raise ValueError(f"{self.name} is not a pet command")
 
     @property
     def is_player_minigolem(self):
