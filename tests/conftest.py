@@ -4,10 +4,10 @@ from gorgonwikibot.content import Ability, Ai
 
 @pytest.fixture
 def dummy_ability():
-    def _dummy(custom=None):
+    def _dummy(id=None, custom=None):
         data = {"Name": "_", "InternalName": "_", "Description": "_"}
         data.update(custom or {})
-        return Ability("_", data)
+        return Ability(id or "_", data)
 
     return _dummy
 

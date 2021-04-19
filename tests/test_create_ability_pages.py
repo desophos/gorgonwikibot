@@ -16,7 +16,7 @@ from scripts.create_ability_pages import (ability_chains, disambiguate,
     ],
 )
 def test_is_learnable(dummy_ability, btest, data):
-    assert btest(is_learnable(dummy_ability(data)))
+    assert btest(is_learnable(dummy_ability(custom=data)))
 
 
 def test_ability_chains():
