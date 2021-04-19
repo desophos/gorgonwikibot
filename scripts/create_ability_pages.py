@@ -262,7 +262,7 @@ def main(site, options):
             continue
         page.text = text
         if options.dry:
-            pywikibot.output(f"{title}\n{page.text}\n")
+            pywikibot.output(f"\n{title}\n{page.text}\n")
         else:
             page.save(summary=options.msg or "Create ability page")
 

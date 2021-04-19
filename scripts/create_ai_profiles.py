@@ -63,11 +63,11 @@ def main(site, options):
         title = f"AIP:{name}"
         page = pywikibot.Page(site, title)
         if page.text == profile:
-            pywikibot.output(f"No changes to {title}\n")
+            pywikibot.output(f"No changes to {title}")
             continue
         page.text = profile
         if options.dry:
-            pywikibot.output(f"{title}\n{page.text}\n")
+            pywikibot.output(f"\n{title}\n{page.text}\n")
         else:
             page.save(summary=options.msg or "Create AI Profile page")
 
