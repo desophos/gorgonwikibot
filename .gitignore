@@ -5,6 +5,7 @@
 *.sublime-*
 *.ctrl
 *.lwp
+user-config.py
 user-password.py
 logs/
 
