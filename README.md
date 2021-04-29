@@ -1,5 +1,5 @@
 # GorgonWikibot
-Bot scripts for the Project: Gorgon Wiki
+Collaboration and contributions are welcome! Please feel free to reach out if you're interested in using this bot in your own project.
 
 ## Usage
 1. Installing GorgonWikibot
