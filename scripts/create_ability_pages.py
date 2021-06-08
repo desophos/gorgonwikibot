@@ -16,6 +16,19 @@ disambiguate = {
 }  # disambiguation from another page with same name
 
 
+def pluralize(n, unit):
+    return f"{n} {unit}{'' if n == 1 else 's'}"
+
+
+def maybe_join(xs, sep=" "):
+    return sep.join(filter(None, xs))
+
+
+def s_if_in(s, x, xs):
+    v = xs.get(x, "")
+    return s.format(v) if v else v
+
+
 def is_learnable(a):
     keywords = a.data.get("Keywords")
     return "Lint_NotLearnable" not in keywords if keywords else True
@@ -53,67 +66,45 @@ def ability_chains():
     return {k: sorted(v, key=attrgetter("name")) for k, v in chains.items()}
 
 
-def generate_infobox(a):
-    def pluralize(n, unit):
-        return f"{n} {unit}{'' if n == 1 else 's'}"
+def process_keywords(a):
+    keywords = a.data.get("Keywords", "")
+    return (
+        "| keywords = " + "".join("{{KWAB|%s}}" % s for s in keywords)
+        if keywords
+        else ""
+    )
 
-    def maybe_join(xs, sep=" "):
-        return sep.join(filter(None, xs))
 
-    def s_if_in(s, x, xs):
-        v = xs.get(x, "")
-        if v:
-            return s.format(v)
-        else:
-            return v
+def process_ragemulti(a):
+    multi = a.data["PvE"].get("RageMultiplier", "")
+    return f"| ragemulti = {multi}" if multi != "" else ""
 
-    s = [
-        "{{Ability infobox",
-        f"| name = {a.name}",
-        f"| description = {a.data['Description']}",
-        f"| level = {a.data['Level']}",
-        f"| power cost = {a.data['PvE']['PowerCost']}",
-        f"| reuse time = {a.data['ResetTime']}",
-        f"| range = {a.data['PvE']['Range']} meters",
-    ]
 
-    try:
-        skill = get_content_by_id(Skill, a.data["Skill"]).name
-    except KeyError:
-        skill = "Unknown"
+def process_specialvalues(a):
+    def format_val(v):
+        return maybe_join([v["Label"], str(v["Value"]), v["Suffix"]]) + "."
 
-    s.append(f"| skill = {skill}")
+    values = a.data["PvE"].get("SpecialValues", "")
+    return " ".join(format_val(v) for v in values) if values else ""
 
-    if "Keywords" in a.data:
-        s.append(
-            "| keywords = " + "".join("{{KWAB|%s}}" % s for s in a.data["Keywords"])
-        )
 
-    if "RageMultiplier" in a.data["PvE"]:
-        s.append(f"| ragemulti = {a.data['PvE']['RageMultiplier']}")
+def process_specialinfo(a):
+    info = a.data.get("SpecialInfo", "")
+    return info + ("." if info and not info.endswith(".") else "")
 
-    special = ""
 
-    if "SpecialValues" in a.data["PvE"]:
-        special = " ".join(
-            maybe_join([v["Label"], str(v["Value"]), v["Suffix"]]) + "."
-            for v in a.data["PvE"]["SpecialValues"]
-        )
-
-    if "SpecialInfo" in a.data:
-        info = a.data["SpecialInfo"]
-        special = maybe_join([special, info + ("" if info.endswith(".") else ".")])
-
-    dots = None
+def process_dots(a):
+    # Assume that no ability has multiple DoT effects.
+    # A maximum of one damaging effect and one special effect are handled.
+    dots, special = "", ""
 
     if "DoTs" in a.data["PvE"]:
         for dot in a.data["PvE"]["DoTs"]:
             if "SpecialRules" in dot and "BuffActivated" in dot["SpecialRules"]:
                 pass
             elif "Preface" in dot:
-                special = maybe_join(
+                special = " ".join(
                     [
-                        special,
                         dot["Preface"],
                         str(dot["DamagePerTick"]),
                         dot["DamageType"],
@@ -130,7 +121,13 @@ def generate_infobox(a):
                     ]
                 )
 
+    return dots, special
+
+
+def process_damage(a):
     damage = ""
+
+    dots, special = process_dots(a)
 
     # get whichever damage is there; only one is present
     damage_amt = a.data["PvE"].get(
@@ -157,15 +154,45 @@ def generate_infobox(a):
     if dots:
         damage = f"{damage} initially and {dots}" if damage_amt else dots
 
+    return damage, special
+
+
+def generate_infobox(a):
+    s = [
+        "{{Ability infobox",
+        f"| name = {a.name}",
+        f"| description = {a.data['Description']}",
+        f"| level = {a.data['Level']}",
+        f"| power cost = {a.data['PvE']['PowerCost']}",
+        f"| reuse time = {a.data['ResetTime']}",
+        f"| range = {a.data['PvE']['Range']} meters",
+    ]
+    specials = []
+
+    try:
+        skill = get_content_by_id(Skill, a.data["Skill"]).name
+    except KeyError:
+        skill = "Unknown"
+    s.append(f"| skill = {skill}")
+
+    s.append(process_keywords(a))
+    s.append(process_ragemulti(a))
+
+    specials.append(process_specialvalues(a))
+    specials.append(process_specialinfo(a))
+
+    damage, dmg_special = process_damage(a)
     if damage:
         s.append(f"| damage = {damage}")
+    specials.append(dmg_special)
 
+    special = maybe_join(specials)
     if special:
         s.append(f"| special = {special}")
 
     s.append("}}")
 
-    return "\n".join(s)
+    return maybe_join(s, "\n")
 
 
 def generate_infoboxes(chain):
