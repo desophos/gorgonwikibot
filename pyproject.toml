@@ -7,13 +7,15 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-requests = "^2.22.0"
-pywikibot = "^3.0.20200111"
-pytest = "^5.4.1"
+requests = "^2.22"
+pywikibot = "^6"
+wikitextparser = "^0.47"
+pytest = "^6"
 coverage = "^5.3"
-pytest-profiling = "^1.7.0"
+pytest-profiling = "^1.7"
 
 [tool.poetry.dev-dependencies]
+black = {version = "^21.5b2", allow-prereleases = true}
 
 [tool.pytest.ini_options]
 markers = [
