@@ -6,24 +6,56 @@ from gorgonwikibot.entrypoint import entrypoint
 from scripts.create_ai_profiles import get_abilities, get_ais
 
 
+def basic_ability(a):
+    return "{{Combat Ability|%s}}(%i damage)" % (
+        a.iname,
+        a.data["PvE"].get("Damage", 0),
+    )
+
+
+def split_ability(a):
+    dmg = a.data["PvE"].get("Damage")
+    return "".join(
+        [
+            "{{Combat Ability icon|%s}}" % a.iname,
+            " || ",
+            "{{Combat Ability name|%s}}" % a.iname,
+            f" || ({dmg} damage)" if dmg else "",
+        ]
+    )
+
+
+def level_table(ai, abilities):
+    rows = []
+
+    for a in abilities:
+        ability_data = ai.data["Abilities"][a.iname]
+        min = ability_data.get("minLevel", 1)
+        max = ability_data.get("maxLevel")
+
+        rows.append(
+            "".join(
+                [
+                    f"| Level {min}",
+                    f"-{max}" if max else "+",
+                    f": || {split_ability(a)}",
+                ]
+            )
+        )
+
+    # css for toggle link
+    rows[0] += ' || style="width:100%; text-align:right;" |'
+
+    return "\n".join(
+        [
+            '{| class="mw-collapsible mw-collapsed"',
+            "\n|-\n".join(rows),
+            "|}",
+        ]
+    )
+
+
 def generate_pet_profiles():
-    def basic_ability(a):
-        return "{{Combat Ability|%s}}(%i damage)" % (
-            a.iname,
-            a.data["PvE"].get("Damage", 0),
-        )
-
-    def split_ability(a):
-        dmg = a.data["PvE"].get("Damage")
-        return "".join(
-            [
-                "{{Combat Ability icon|%s}}" % a.iname,
-                " || ",
-                "{{Combat Ability name|%s}}" % a.iname,
-                f" || ({dmg} damage)" if dmg else "",
-            ]
-        )
-
     abilities = get_abilities(lambda a: a.is_pet, ["GrimalkinBite", "GrimalkinClaw"])
     ais = get_ais(lambda ai: ai.is_pet)
     profiles = {}
@@ -52,35 +84,6 @@ def generate_pet_profiles():
                         f"WARNING: Skipped ability {a.name} for AI {ai.name} because it is not a pet command\n"
                     )
 
-            def level_table(cmd):
-                rows = []
-
-                for a in cmds[cmd]:
-                    ai_ability_data = ai.data["Abilities"][a.iname]
-                    min = ai_ability_data.get("minLevel", 1)
-                    max = ai_ability_data.get("maxLevel")
-
-                    rows.append(
-                        "".join(
-                            [
-                                f"| Level {min}",
-                                f"-{max}" if max else "+",
-                                f": || {split_ability(a)}",
-                            ]
-                        )
-                    )
-
-                # css for toggle link
-                rows[0] += ' || style="width:100%; text-align:right;" |'
-
-                return "\n".join(
-                    [
-                        '{| class="mw-collapsible mw-collapsed"',
-                        "\n|-\n".join(rows),
-                        "|}",
-                    ]
-                )
-
             basic_text = ", ".join(
                 [basic_ability(a) for a in cmds[Ability.PetCommands.BASIC]]
             )
@@ -91,10 +94,10 @@ def generate_pet_profiles():
                     f"| Basic Attack: || {basic_text}",
                     "|-",
                     "| Sic 'Em Attack: || ",
-                    level_table(Ability.PetCommands.SIC),
+                    level_table(ai, cmds[Ability.PetCommands.SIC]),
                     "|-",
                     "| Special Trick: || ",
-                    level_table(Ability.PetCommands.TRICK),
+                    level_table(ai, cmds[Ability.PetCommands.TRICK]),
                     "|}",
                     "<noinclude>[[Category:Pet Profile]]</noinclude>",
                 ]
