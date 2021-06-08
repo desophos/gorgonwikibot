@@ -3,9 +3,15 @@ import sys
 from operator import attrgetter
 
 import pywikibot
-from gorgonwikibot.content import (Ability, Skill, get_all_content,
-                                   get_content_by_id, get_content_by_iname,
-                                   get_name_from_iname)
+from gorgonwikibot.content import (
+    Ability,
+    Skill,
+    get_all_content,
+    get_content_by_id,
+    get_content_by_iname,
+    get_name_from_iname,
+    separate_words,
+)
 from gorgonwikibot.entrypoint import entrypoint
 
 # Front Kick is in Unarmed and Cow
@@ -54,7 +60,7 @@ def ability_chains():
             basename = re.search(regex, a.name)[0]
             basename = disambiguate.get(basename, basename)
             if basename in duplicates:
-                basename += f" ({a.data['Skill']})"
+                basename += f" ({separate_words(a.data['Skill'])})"
             try:
                 chains[basename].append(a)
             except KeyError:

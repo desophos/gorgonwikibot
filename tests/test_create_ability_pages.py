@@ -4,6 +4,7 @@ from operator import not_, truth
 import pytest
 from scripts.create_ability_pages import (ability_chains, disambiguate,
                                           is_learnable)
+from gorgonwikibot.content import separate_words
 
 
 @pytest.mark.parametrize(
@@ -40,7 +41,7 @@ def test_ability_chains():
             fullname = f"{name} ({skill})"
             assert fullname in chains
             for a in chains[fullname]:
-                assert a.data["Skill"] == skill
+                assert separate_words(a.data["Skill"]) == skill
             dupe_names.append(fullname)
     # make sure keys match values
     for basename, chain in chains.items():
