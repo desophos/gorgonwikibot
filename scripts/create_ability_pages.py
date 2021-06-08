@@ -15,7 +15,8 @@ from gorgonwikibot.content import (
 from gorgonwikibot.entrypoint import entrypoint
 
 # Front Kick is in Unarmed and Cow
-duplicates = ["Front Kick"]  # disambiguation between skills
+# Cold Protection is in Fire Magic and Ice Magic
+duplicates = ["Front Kick", "Cold Protection"]  # disambiguation between skills
 disambiguate = {
     name: f"{name} (ability)"
     for name in ["First Aid", "Rabbit's Foot", "Lycanspore Bomb"]

@@ -33,7 +33,10 @@ def test_ability_chains():
     for k, v in disambiguate.items():
         assert v in chains and k not in chains
     # duplicates
-    dupe_skills = {"Front Kick": ["Unarmed", "Cow"]}
+    dupe_skills = {
+        "Front Kick": ["Unarmed", "Cow"],
+        "Cold Protection": ["Fire Magic", "Ice Magic"],
+    }
     dupe_names = []
     for name, skills in dupe_skills.items():
         assert name not in chains
